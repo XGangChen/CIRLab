@@ -8,7 +8,7 @@ After compilation, in the [Setup user privileges to use real-time scheduling](ht
 ```
 sudo nano /etc/security/limits.conf
 
-# in the .conf file, scroll to the bottom (all lines should be annotated by #)
+# in the .conf file, scroll to the bottom then add:(all lines should be annotated by #)
 #@realtime soft rtprio 99
 #@realtime soft priority 99
 #@realtime soft memlock 102400
