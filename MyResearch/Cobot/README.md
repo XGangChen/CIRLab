@@ -4,4 +4,6 @@ The goal for this project is to design a safety algorithm for the Human-Robot wo
 ## Experimental Environment
 
 ### Using KinectV2 and Realsense D435f by ROS2 Humble
-I installed the packages of KinectV2 and RealSense separately; you can see other projects in this repository. There are several issues when I tried to run two cameras side-by-side using ROS2, so here's how to fix it:
+I installed the packages of KinectV2 and RealSense separately; you can see other projects in this repository. There are several issues when I tried to run two cameras side-by-side using ROS2, so here’s a clean, practical checklist + ready-to-run examples so you can run Kinect v2 (kinect2_bridge) and RealSense (realsense2_camera) side-by-side:
+<details>
+  <sumary>
