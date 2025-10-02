@@ -20,7 +20,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 
 ### Setup URSim with Docker
   The Docker Hub that the tutorial provided is for e-series. Since I'm using UR3, which is the older one, I use this: [ursim_cb3](https://hub.docker.com/r/universalrobots/ursim_cb3)
-* Run the image: \n
+* Run the image:  
   `docker run --rm -it universalrobots/ursim_cb3` This Docker command couldn't really view the user interface by clicking the link that the terminal provides, or using VNC applications.
   ```
   # VNC port: 5900
