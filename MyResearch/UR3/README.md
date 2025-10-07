@@ -35,3 +35,5 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
   * **External Control**:
   Follow the tutorial about [External Control](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/ursim_docker.html#external-control), and don't forget to specify the model of the robot.
   After this, you should be able to setup the `external_control` URCap and create a program as described in URCap setup guide.
+  In my experiment, I use:
+  `docker run --rm -it -e ROBOT_MODEL=UR3 -p 5900:5900 -p 6080:6080 -v ${HOME}/.ursim/urcaps:/urcaps -v ${HOME}/.ursim/programs:/ursim/programs --name ursim universalrobots/ursim_cb3`
