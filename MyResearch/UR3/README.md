@@ -25,7 +25,9 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
     <summary>
       * Run the image:
     </summary>
-    `docker run --rm -it universalrobots/ursim_cb3` This Docker command couldn't really view the user interface by clicking the link that the terminal provides, or using VNC applications.
+    ```bash
+    docker run --rm -it universalrobots/ursim_cb3 
+    This Docker command couldn't really view the user interface by clicking the link that the terminal provides, or using VNC applications.
       ```
       # VNC port: 5900
       # Web browser VNC port: 6080
