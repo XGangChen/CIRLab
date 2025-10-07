@@ -51,4 +51,9 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
     ```
     Although the tutorial says that the VNC web server should be available at `http://192.168.56.101:6080/vnc.html`, I still can't open it.
     So, I still use the original one [Link](http://localhost:6080/vnc.html?host=localhost&port=6080)
-  * 
+  * **Script Startup**
+    I followed the tutorial step-by-step, so I'm not using the `start_ursim.sh` script.
+    
+
+
+    
