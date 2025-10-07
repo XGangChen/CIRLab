@@ -22,9 +22,10 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 ### Setup URSim with Docker
   The Docker Hub that the tutorial provided is for e-series. Since I'm using UR3, which is the older one, I use this: [ursim_cb3](https://hub.docker.com/r/universalrobots/ursim_cb3)
   <details>
-  * Run the image:
     <summary>
-      `docker run --rm -it universalrobots/ursim_cb3` This Docker command couldn't really view the user interface by clicking the link that the terminal provides, or using VNC applications.
+      * Run the image:
+    </summary>
+    `docker run --rm -it universalrobots/ursim_cb3` This Docker command couldn't really view the user interface by clicking the link that the terminal provides, or using VNC applications.
       ```
       # VNC port: 5900
       # Web browser VNC port: 6080
@@ -33,12 +34,11 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       ```
       The right way is running this Docker command and using this [link](http://localhost:6080/vnc.html?host=localhost&port=6080): `http://localhost:6080/vnc.html?host=localhost&port=6080`.  
       The robot model can be selected using the environment variable `ROBOT_MODEL`. The models' options available are `UR3`, `UR5`, and `UR10`. The default is UR5.
-    </summary>
   </details>
   <details>
-  * External Control:
     <summary>
-      Follow the tutorial about [External Control](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/ursim_docker.html#external-control), and don't forget to specify the model of the robot.  
-      After this, you should be able to setup the `external_control` URCap and create a program as described in URCap setup guide.
+      * External Control:
     </summary>
+    Follow the tutorial about [External Control](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/ursim_docker.html#external-control), and don't forget to specify the model of the robot.  
+      After this, you should be able to setup the `external_control` URCap and create a program as described in URCap setup guide.
   </details>
