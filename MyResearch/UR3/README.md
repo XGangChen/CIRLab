@@ -21,7 +21,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 
 ### Setup URSim with Docker
   The Docker Hub that the tutorial provided is for e-series. Since I'm using UR3, which is the older one, I use this: [ursim_cb3](https://hub.docker.com/r/universalrobots/ursim_cb3)
-  * **Run the image**:
+  * **Run the image:**
     `docker run --rm -it universalrobots/ursim_cb3`
     This Docker command couldn't really view the user interface by clicking the link that the terminal provides, or using VNC applications.
       ```
@@ -32,10 +32,23 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       ```
     The right way is running this Docker command and using this [link](http://localhost:6080/vnc.html?host=localhost&port=6080): `http://localhost:6080/vnc.html?host=localhost&port=6080`.  
     The robot model can be selected using the environment variable `ROBOT_MODEL`. The models' options available are `UR3`, `UR5`, and `UR10`. The default is UR5.
-  * **External Control**:
-  Follow the tutorial about [External Control](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/ursim_docker.html#external-control), and don't forget to specify the model of the robot.
-  After this, you should be able to setup the `external_control` URCap and create a program as described in URCap setup guide.
-  In my experiment, I use:
-  ```
-  docker run --rm -it -e ROBOT_MODEL=UR3 -p 5900:5900 -p 6080:6080 -v ${HOME}/.ursim/urcaps:/urcaps -v ${HOME}/.ursim/programs:/ursim/programs --name ursim universalrobots/ursim_cb3
-  ```
+  * **External Control:**
+    Follow the tutorial about [External Control](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/ursim_docker.html#external-control), and don't forget to specify the model of the robot.
+    After this, you should be able to setup the `external_control` URCap and create a program as described in URCap setup guide.
+    In my experiment, I use:
+      ```
+      docker run --rm -it -e ROBOT_MODEL=UR3 -p 5900:5900 -p 6080:6080 -v ${HOME}/.ursim/urcaps:/urcaps -v ${HOME}/.ursim/programs:/ursim/programs --name ursim universalrobots/ursim_cb3
+      ```
+  * **Network Setup:**
+    To use the specific docker network, we can assign a static IP address to our URSim container:
+    ```
+    docker network create --subnet=192.168.56.0/24 ursim_net
+    docker run --rm -it -e ROBOT_MODEL=UR3 -p 5900:5900 -p 6080:6080 \
+      -v ${HOME}/.ursim/urcaps:/urcaps \
+      -v ${HOME}/.ursim/programs:/ursim/programs \
+      --net ursim_net --ip 192.168.56.101 \
+      --name ursim universalrobots/ursim_cb3
+    ```
+    Although the tutorial says that the VNC web server should be available at `http://192.168.56.101:6080/vnc.html`, I still can't open it.
+    So, I still use the original one [Link](http://localhost:6080/vnc.html?host=localhost&port=6080)
+  * 
