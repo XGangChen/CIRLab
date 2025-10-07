@@ -34,9 +34,11 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       The right way is running this Docker command and using this [link](http://localhost:6080/vnc.html?host=localhost&port=6080): `http://localhost:6080/vnc.html?host=localhost&port=6080`.  
       The robot model can be selected using the environment variable `ROBOT_MODEL`. The models' options available are `UR3`, `UR5`, and `UR10`. The default is UR5.
     </summary>
+  </details>
   <details>
   * External Control:
     <summary>
       Follow the tutorial about [External Control](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/ursim_docker.html#external-control), and don't forget to specify the model of the robot.  
       After this, you should be able to setup the `external_control` URCap and create a program as described in URCap setup guide.
     </summary>
+  </details>
