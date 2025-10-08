@@ -88,5 +88,21 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
     (C) **Connection Directions**  
       | Direction                     | Who connects                           | Destination IP/port                                       | Explanation                                                         |
       |-------------------------------|----------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------------|
-      | ROS 2 → URSim                | ROS driver connects to URSim           | `127.0.0.1:30001–30004` (if ports are mapped)             | Set `robot_ip:=127.0.0.1` in the launch command                     |
-      | URSim → ROS 2 (reverse control) | External Control node connects back     | Host IP visible to container (`172.17.0.1` or LAN IP) port `50002` | Configure this in the URSim GUI External Control node               |
+      | ROS 2 → URSim | ROS driver connects to URSim | `127.0.0.1:30001–30004` (if ports are mapped) | Set `robot_ip:=127.0.0.1` in the launch command |
+      | URSim → ROS 2 (reverse control) | External Control node connects back | Host IP visible to container (`172.17.0.1` or LAN IP) port `50002` | Configure this in the URSim GUI External Control node |
+    (D) **The Final Command I Use**
+      ```
+      docker run --rm -it \    # 
+        -e ROBOT_MODEL=UR3 \
+        -p 5900:5900 \
+        -p 6080:6080 \
+        -p 29999:29999 \
+        -p 30001:30001 \
+        -p 30002:30002 \
+        -p 30003:30003 \
+        -p 30004:30004 \
+        -v ${HOME}/.ursim/urcaps:/urcaps \
+        -v ${HOME}/.ursim/programs:/ursim/programs \
+        --name ursim universalrobots/ursim_cb3
+
+      ```
