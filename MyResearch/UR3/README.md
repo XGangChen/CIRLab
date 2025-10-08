@@ -77,14 +77,14 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
         VirtualBox installs an interface like this: `vboxnet0 → 192.168.56.1 (host)`
         This network is meant for VirtualBox VMs (not Docker).  
         If you assign a Docker container IP inside `192.168.56.x`, your host will send packets to VirtualBox’s network instead — causing the “cannot connect to robot” error.
-    2. The Correct IP Roles in Your Setup
+    2. The Correct IP Roles in Your Setup  
       | Component                  | What runs there           | Typical IP                                            | Explanation                                           |
       |----------------------------|---------------------------|-------------------------------------------------------|-------------------------------------------------------|
       | Host machine (Ubuntu)     | ROS 2, `ur_robot_driver`  | `127.0.0.1`, `172.17.0.1`, or LAN IP (e.g., `192.168.1.50`) | “localhost” means this machine itself |
       | Docker container (URSim)  | Robot simulator           | `172.17.0.2` (inside `docker0` network)               | The virtual robot |
       | VirtualBox                | (Not used for URSim)      | `192.168.56.x`                                        | Separate, unrelated network — should not be reused here |
-    3. Connection Directions
+    3. Connection Directions  
       | Direction                     | Who connects                           | Destination IP/port                                       | Explanation                                                         |
-      |------------------------------|----------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------------|
+      |-------------------------------|----------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------------|
       | ROS 2 → URSim                | ROS driver connects to URSim           | `127.0.0.1:30001–30004` (if ports are mapped)             | Set `robot_ip:=127.0.0.1` in the launch command                     |
       | URSim → ROS 2 (reverse control) | External Control node connects back     | Host IP visible to container (`172.17.0.1` or LAN IP) port `50002` | Configure this in the URSim GUI External Control node               |
