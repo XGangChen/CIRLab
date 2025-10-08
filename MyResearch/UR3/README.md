@@ -90,9 +90,10 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       |-------------------------------|----------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------------|
       | ROS 2 → URSim | ROS driver connects to URSim | `127.0.0.1:30001–30004` (if ports are mapped) | Set `robot_ip:=127.0.0.1` in the launch command |
       | URSim → ROS 2 (reverse control) | External Control node connects back | Host IP visible to container (`172.17.0.1` or LAN IP) port `50002` | Configure this in the URSim GUI External Control node |
+      
     (D) **The Final Command I Use**
       ```
-      docker run --rm -it \    # 
+      docker run --rm -it \    
         -e ROBOT_MODEL=UR3 \
         -p 5900:5900 \
         -p 6080:6080 \
@@ -105,4 +106,6 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
         -v ${HOME}/.ursim/programs:/ursim/programs \
         --name ursim universalrobots/ursim_cb3
 
+      # Replace `--rm` can keep the container existing, then you can click the VNC link after using the command below:
+      docker start ursim
       ```
