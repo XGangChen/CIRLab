@@ -55,8 +55,12 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
     I followed the tutorial step-by-step, so I didn't use the `start_ursim.sh` script.  
     There's another issue that the ROS2 command `ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=192.168.56.101` would result in an error about the IP address.  
     Here are the network layers we have for Host(PC), Docker container network, and VirtualBox Host-Only Adapter:  
-    | **Layer** | **What it is** | **Example IP range** | **Role** |
-    | **Host  (local machine)** | Ubuntu PC (where ROS2 runs) | `192.168.1.x`(LAN) or  `127.0.0.1`(loopback) | Runs ROS2 |
+    | Layer | What it is | Example IP range | Role |
+    |-------|------------|------------------|------|
+    | Host (local machine) | Ubuntu PC (where ROS 2 runs) | 192.168.1.x (LAN) or 127.0.0.1 (loopback) | Runs ROS 2 |
+    | Docker container network | Internal Docker bridge (ursim container) | 172.17.0.0/16 (e.g., host: 172.17.0.1, container: 172.17.0.2) | Runs URSim |
+    | VirtualBox Host-Only Adapter | Host-only network for VMs | 192.168.56.0/24 | Not used by Docker; can conflict if reused |
+
 
 
     
