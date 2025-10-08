@@ -55,14 +55,14 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
     I followed the tutorial step-by-step, so I didn't use the `start_ursim.sh` script.  
     There's another issue that the ROS2 command `ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=192.168.56.101` would result in an error about the IP address.  
 
-    1. The Three Network Layers You Have: **Currently Wrong IP Setup**
+    (A) The Three Network Layers You Have: Currently Wrong IP Setup  
       | Layer | What it is | Example IP range | Role |
       |-------|------------|------------------|------|
       | **Host (local machine)** | Ubuntu PC (where ROS 2 runs) | `192.168.1.x` (LAN) or `127.0.0.1` (loopback) | Runs ROS 2 |
       | **Docker container network** | Internal Docker bridge (ursim container) | `172.17.0.0/16` (e.g., host: `172.17.0.1`, container: `172.17.0.2`) | Runs URSim |
       | **VirtualBox Host-Only Adapter** | Host-only network for VMs | `192.168.56.0/24` | Not used by Docker; can conflict if reused |
 
-      **(A) Host to Docker container**  
+      **1. Host to Docker container**  
         By default, Docker makes a bridge network:
         ```
         Host (Ubuntu)
@@ -73,17 +73,19 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
         * The container can reach the host at `172.17.0.1`.
         * To expose container ports to the outside, we use `-p HOST_PORT:CONTAINER_PORT`.  
           `-p 30001:30001`: Any connection to `127.0.0.1:30001` on the host forwards to the container’s port `30001`.  
-      **(B) VirtualBox Host-Only Adapter**
+      **2. VirtualBox Host-Only Adapter**
         VirtualBox installs an interface like this: `vboxnet0 → 192.168.56.1 (host)`
         This network is meant for VirtualBox VMs (not Docker).  
         If you assign a Docker container IP inside `192.168.56.x`, your host will send packets to VirtualBox’s network instead — causing the “cannot connect to robot” error.
-    2. The Correct IP Roles in Your Setup  
+      
+    (B) The Correct IP Roles in Your Setup  
       | Component                  | What runs there           | Typical IP                                            | Explanation                                           |
       |----------------------------|---------------------------|-------------------------------------------------------|-------------------------------------------------------|
       | Host machine (Ubuntu)     | ROS 2, `ur_robot_driver`  | `127.0.0.1`, `172.17.0.1`, or LAN IP (e.g., `192.168.1.50`) | “localhost” means this machine itself |
       | Docker container (URSim)  | Robot simulator           | `172.17.0.2` (inside `docker0` network)               | The virtual robot |
       | VirtualBox                | (Not used for URSim)      | `192.168.56.x`                                        | Separate, unrelated network — should not be reused here |
-    3. Connection Directions  
+      
+    (C) Connection Directions  
       | Direction                     | Who connects                           | Destination IP/port                                       | Explanation                                                         |
       |-------------------------------|----------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------------|
       | ROS 2 → URSim                | ROS driver connects to URSim           | `127.0.0.1:30001–30004` (if ports are mapped)             | Set `robot_ip:=127.0.0.1` in the launch command                     |
