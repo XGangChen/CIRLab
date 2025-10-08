@@ -108,4 +108,9 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 
       # Replace `--rm` can keep the container existing, then you can click the VNC link after using the command below:
       docker start ursim
+
+      # Run the ROS2 command to see the robot in RViz:
+      ros2 launch ur_robot_driver ur_control.launch.py \
+        ur_type:=ur3 \
+        robot_ip:=127.0.0.1
       ```
