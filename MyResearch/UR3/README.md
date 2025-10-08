@@ -6,7 +6,7 @@ I followed this [Tutorial Document](https://docs.ros.org/en/ros2_packages/humble
 But there are some issues while doing the Compilation:  
 Building the kernel using `make -j $(getconf _NPROCESSORS_ONLN) deb-pkg` would result in errors. I solved this by following GPT5's resolution. Here's the conversation [GPT5 solution](https://chatgpt.com/share/68ca7264-6fac-800f-898e-0cd488db0bb7).  
 After compilation, in the [Setup user privileges to use real-time scheduling](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/real_time.html#setup-user-privileges-to-use-real-time-scheduling) section. You need to add the "@realtime" lines to the .conf file.
-```bash
+```
 sudo nano /etc/security/limits.conf
 
 # in the .conf file, scroll to the bottom, then add:(all lines should be annotated by #)
@@ -62,7 +62,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       | **Docker container network** | Internal Docker bridge (ursim container) | `172.17.0.0/16` (e.g., host: `172.17.0.1`, container: `172.17.0.2`) | Runs URSim |
       | **VirtualBox Host-Only Adapter** | Host-only network for VMs | `192.168.56.0/24` | Not used by Docker; can conflict if reused |
 
-    **(A) Host to Docker container**
+    **(A) Host to Docker container**  
       By default, Docker makes a bridge network:
       ```
       Host (Ubuntu)
@@ -73,4 +73,5 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       * The container can reach the host at `172.17.0.1`.
       * To expose container ports to the outside, we use `-p HOST_PORT:CONTAINER_PORT`.
         `-p 30001:30001`: Any connection to `127.0.0.1:30001` on the host forwards to the container’s port `30001`.
+    **(B) **
     
