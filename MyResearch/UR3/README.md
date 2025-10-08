@@ -62,14 +62,14 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       | **Docker container network** | Internal Docker bridge (ursim container) | `172.17.0.0/16` (e.g., host: `172.17.0.1`, container: `172.17.0.2`) | Runs URSim |
       | **VirtualBox Host-Only Adapter** | Host-only network for VMs | `192.168.56.0/24` | Not used by Docker; can conflict if reused |
     
-      1. **Host to Docker container**  
+      1. **Host to Docker container:**  
         By default, Docker makes a bridge network:  
         `Host (Ubuntu) -> docker0 interface: 172.17.0.1 -> container IP: 172.17.0.2`  
         * The host can reach the container at `172.17.0.2`.
         * The container can reach the host at `172.17.0.1`.
         * To expose container ports to the outside, we use `-p HOST_PORT:CONTAINER_PORT`.  
           `-p 30001:30001`: Any connection to `127.0.0.1:30001` on the host forwards to the container’s port `30001`.  
-      2. **VirtualBox Host-Only Adapter**  
+      2. **VirtualBox Host-Only Adapter:**  
         VirtualBox installs an interface like this: `vboxnet0 → 192.168.56.1 (host)`
         This network is meant for VirtualBox VMs (not Docker).  
         If you assign a Docker container IP inside `192.168.56.x`, your host will send packets to VirtualBox’s network instead — causing the “cannot connect to robot” error.
