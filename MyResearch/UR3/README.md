@@ -125,22 +125,22 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       <summary>
         Logs from my terminal
       </summary>
-      python3-colcon-common-extensions:
-        Installed: 0.3.0-100
-        Candidate: 0.3.0-100
-        Version table:
-       *** 0.3.0-100 500
-              500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages
-              500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages
-              100 /var/lib/dpkg/status
-      python3-colcon-mixin:
-        Installed: 0.2.3-100
-        Candidate: 0.2.3-100
-        Version table:
-       *** 0.2.3-100 500
-              500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages
-              500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages
-              100 /var/lib/dpkg/status
+      python3-colcon-common-extensions:  
+        Installed: 0.3.0-100  
+        Candidate: 0.3.0-100  
+        Version table:  
+       *** 0.3.0-100 500  
+              500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages  
+              500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages  
+              100 /var/lib/dpkg/status  
+      python3-colcon-mixin:  
+        Installed: 0.2.3-100  
+        Candidate: 0.2.3-100  
+        Version table:  
+       *** 0.2.3-100 500  
+              500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages  
+              500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages  
+              100 /var/lib/dpkg/status  
     </details>
   2. Does the `colcon` + `mixin` command work?
     ```
