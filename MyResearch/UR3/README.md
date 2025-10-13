@@ -119,7 +119,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 * **Install ROS2 and colcon:**  
   I've installed the ROS2 Humble and colcon before. Also, `rosdep` and `vsctool` packages have been installed.  
   To verify whether it is installed in your device, try the commands below:  
-  **STEP 1:** Are the APT packages installed?
+  **STEP 1: Are the APT packages installed?**
     ```
     apt-cache policy python3-colcon-common-extensions python3-colcon-mixin
     ```
@@ -142,7 +142,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
             500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages
             100 /var/lib/dpkg/status
     ```
-  **STEP 2:** Does the `colcon` + `mixin` command work?
+  **STEP 2: Does the `colcon` + `mixin` command work?**
     ```
     command -v colcon
     colcon --version
@@ -173,7 +173,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       {add,list,remove,show,update}
                             call `colcon mixin VERB -h` for specific help
     ```
-  **STEP 3:** Is the “default” mixin repository added and updated?
+  **STEP 3: Is the “default” mixin repository added and updated?**
     ```
     colcon mixin list
     
