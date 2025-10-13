@@ -99,7 +99,8 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       URCAP_VERSION=1.0.5 # latest version as if writing this
       curl -L -o ${HOME}/.ursim/urcaps/externalcontrol-${URCAP_VERSION}.jar \
         https://github.com/UniversalRobots/Universal_Robots_ExternalControl_URCap/releases/download/v${URCAP_VERSION}/externalcontrol-${URCAP_VERSION}.jar
-      
+
+      # Replace `--rm` can keep the container existing
       docker run -it \ 
         -e ROBOT_MODEL=UR3 \
         -p 5900:5900 \
@@ -113,7 +114,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
         -v ${HOME}/.ursim/programs:/ursim/programs \
         --name ursim universalrobots/ursim_cb3
 
-      # Replace `--rm` can keep the container existing, then you can click the VNC link after using the command below:
+      # After the creation, you just need to start the container, then click the link for URSim VNC.
       docker start ursim
 
       # Run the ROS2 command to see the robot in RViz:
