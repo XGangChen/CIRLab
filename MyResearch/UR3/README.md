@@ -119,94 +119,66 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 ### Install ROS2 and colcon  
   I've installed the ROS2 Humble and colcon before. Also, `rosdep` and `vsctool` packages have been installed.  
   To verify whether it is installed in your device, try the commands below:  
-  **STEP 1: Are the APT packages installed?**
+  * Are the APT packages installed?
     ```
     apt-cache policy python3-colcon-common-extensions python3-colcon-mixin
     ```
     Logs from my terminal:
-      ```
-        python3-colcon-common-extensions:
+    ```
+    python3-colcon-common-extensions:
       Installed: 0.3.0-100
       Candidate: 0.3.0-100
       Version table:
-       *** 0.3.0-100 500
-              500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages
-              500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages
-              100 /var/lib/dpkg/status
-      python3-colcon-mixin:
-        Installed: 0.2.3-100
-        Candidate: 0.2.3-100
-        Version table:
-       *** 0.2.3-100 500
-              500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages
-              500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages
-              100 /var/lib/dpkg/status
-      ```
-  **STEP 2: Does the `colcon` + `mixin` command work?**
+     *** 0.3.0-100 500
+            500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages
+            500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages
+            100 /var/lib/dpkg/status
+    python3-colcon-mixin:
+      Installed: 0.2.3-100
+      Candidate: 0.2.3-100
+      Version table:
+     *** 0.2.3-100 500
+            500 http://packages.ros.org/ros2/ubuntu jammy/main amd64 Packages
+            500 http://packages.ros.org/ros2/ubuntu jammy/main i386 Packages
+            100 /var/lib/dpkg/status
+    ```
+  * Does the `colcon` + `mixin` command work?
     ```
     command -v colcon
     colcon --version
     colcon mixin -h
     ```
     Logs from my terminal:
-      ```
-      colcon --version
-      colcon mixin -h
-      /usr/bin/colcon
-      usage: colcon [-h] [--log-base LOG_BASE] [--log-level LOG_LEVEL]
-                    {build,extension-points,extensions,graph,info,list,metadata,mixin,test,test-result,version-check} ...
-      colcon: error: argument verb_name: invalid choice: '--version' (choose from 'build', 'extension-points', 'extensions', 'graph', 'info', 'list', 'metadata', 'mixin', 'test', 'test-result', 'version-check')
-      usage: colcon mixin [-h] {add,list,remove,show,update} ...
-      Manage CLI mixins.
-      options:
-        -h, --help            show this help message and exit
-      colcon mixin verbs:
-        add                   Add the URL of a repository index
-        list                  List all repositories and their mixin
-        remove                Remove a repository from the list of indexes
-        show                  Show available mixins and their mapping
-        update                Update the mixin from the repository indexes
-        {add,list,remove,show,update}
-                              call `colcon mixin VERB -h` for specific help
-      ```
-  **STEP 3: Is the “default” mixin repository added and updated?**
+    ```
+    /usr/bin/colcon
+    usage: colcon [-h] [--log-base LOG_BASE] [--log-level LOG_LEVEL]
+                  {build,extension-points,extensions,graph,info,list,metadata,mixin,test,test-result,version-check} ...
+    colcon: error: argument verb_name: invalid choice: '--version' (choose from 'build', 'extension-points', 'extensions', 'graph', 'info', 'list', 'metadata', 'mixin', 'test', 'test-result', 'version-check')
+    usage: colcon mixin [-h] {add,list,remove,show,update} ...
+    
+    Manage CLI mixins.
+    
+    options:
+      -h, --help            show this help message and exit
+    
+    colcon mixin verbs:
+      add                   Add the URL of a repository index
+      list                  List all repositories and their mixin
+      remove                Remove a repository from the list of indexes
+      show                  Show available mixins and their mapping
+      update                Update the mixin from the repository indexes
+    
+      {add,list,remove,show,update}
+                            call `colcon mixin VERB -h` for specific help
+    ```
+  * Is the “default” mixin repository added and updated?
     ```
     colcon mixin list
-    # You should see an entry like:
-    default  https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml  (enabled)
-    # If it’s missing, add/update it:
+    # If there is nothing turns up:
     colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
     colcon mixin update default
+    # Verify again:
+    ls -R ~/.colcon/mixin
+    cat ~/.colcon/mixin/index.yaml
     ```
-    Logs from my terminal:  
-      ```
-      ls -R ~/.colcon/mixin
-      cat ~/.colcon/mixin/index.yaml
-      default: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-      - /home/xgang/.colcon/mixin/default/asan.mixin
-      - /home/xgang/.colcon/mixin/default/build-testing.mixin
-      - /home/xgang/.colcon/mixin/default/build-type.mixin
-      - /home/xgang/.colcon/mixin/default/ccache.mixin
-      - /home/xgang/.colcon/mixin/default/clang-libcxx.mixin
-      - /home/xgang/.colcon/mixin/default/clang.mixin
-      - /home/xgang/.colcon/mixin/default/compile-commands.mixin
-      - /home/xgang/.colcon/mixin/default/coverage.mixin
-      - /home/xgang/.colcon/mixin/default/gold.mixin
-      - /home/xgang/.colcon/mixin/default/instrument-functions.mixin
-      - /home/xgang/.colcon/mixin/default/lld.mixin
-      - /home/xgang/.colcon/mixin/default/memcheck.mixin
-      - /home/xgang/.colcon/mixin/default/mold.mixin
-      - /home/xgang/.colcon/mixin/default/ninja.mixin
-      - /home/xgang/.colcon/mixin/default/sccache.mixin
-      - /home/xgang/.colcon/mixin/default/shared.mixin
-      - /home/xgang/.colcon/mixin/default/test-linters.mixin
-      - /home/xgang/.colcon/mixin/default/tsan.mixin
-      /home/xgang/.colcon/mixin:
-      default
-      /home/xgang/.colcon/mixin/default:
-      asan.mixin           clang-libcxx.mixin      gold.mixin                  mold.mixin     test-linters.mixin
-      build-testing.mixin  clang.mixin             instrument-functions.mixin  ninja.mixin    tsan.mixin
-      build-type.mixin     compile-commands.mixin  lld.mixin                   sccache.mixin
-      ccache.mixin         coverage.mixin          memcheck.mixin              shared.mixin
-      cat: /home/xgang/.colcon/mixin/index.yaml: No such file or directory
-      ```
+   
