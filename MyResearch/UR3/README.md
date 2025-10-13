@@ -117,14 +117,14 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 ### Getting Started  
 * **Install ROS2 and colcon:**  
   I've installed the ROS2 Humble and colcon before. To verify whether it is installed in your device, try the commands below:
-  1. Are the APT packages installed?
+  **STEP 1:** Are the APT packages installed?
     ```
     apt-cache policy python3-colcon-common-extensions python3-colcon-mixin
     ```
     <details>
-      <commands>
+      <summary>
         Logs from my terminal
-      </commands>
+      </summary>
       python3-colcon-common-extensions:
         Installed: 0.3.0-100
         Candidate: 0.3.0-100
