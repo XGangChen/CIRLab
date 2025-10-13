@@ -87,7 +87,7 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       | ROS 2 → URSim | ROS driver connects to URSim | `127.0.0.1:30001–30004` (if ports are mapped) | Set `robot_ip:=127.0.0.1` in the launch command |
       | URSim → ROS 2 (reverse control) | External Control node connects back | Host IP visible to container (`172.17.0.1` or LAN IP) port `50002` | Configure this in the URSim GUI External Control node |
 
-  * **The Final Command I Use**
+  * **The Final Command I Use**  
     Since my real-world experimental setup, the UR3 has a ROBOTIQ 2F-85 Gripper installed on it, I installed the ROBOTIQ Gripper URCap file into the URSim while I created the container.
     However, the ROBOTIQ Gripper URCap can only show the commands in URSim because URSim couldn't detect the gripper in the simulation world.
       ```
