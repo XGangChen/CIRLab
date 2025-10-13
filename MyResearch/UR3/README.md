@@ -114,9 +114,11 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
 ## MoveIt  
   I followed the tutorial document: [MoveIt](https://moveit.picknik.ai/main/index.html)  
   If there's any difference with my device, I will show and describe it below.  
+  
 ### Getting Started  
 * **Install ROS2 and colcon:**  
-  I've installed the ROS2 Humble and colcon before. To verify whether it is installed in your device, try the commands below:
+  I've installed the ROS2 Humble and colcon before. Also, `rosdep` and `vsctool` packages have been installed.  
+  To verify whether it is installed in your device, try the commands below:  
   **STEP 1:** Are the APT packages installed?
     ```
     apt-cache policy python3-colcon-common-extensions python3-colcon-mixin
