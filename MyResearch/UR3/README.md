@@ -17,9 +17,7 @@ sudo nano /etc/security/limits.conf
 #@realtime hard priority 99
 #@realtime hard memlock 102400
 ```
-I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/real_time.html#optional-disable-cpu-speed-scaling)
-
----
+I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/real_time.html#optional-disable-cpu-speed-scaling)  
 
 ### Setup URSim with Docker
   The Docker Hub that the tutorial provided is for e-series. Since I'm using UR3, which is the older one, I use this: [ursim_cb3](https://hub.docker.com/r/universalrobots/ursim_cb3)
@@ -44,6 +42,9 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       ```
       docker run --rm -it -e ROBOT_MODEL=UR3 -p 5900:5900 -p 6080:6080 -v ${HOME}/.ursim/urcaps:/urcaps -v ${HOME}/.ursim/programs:/ursim/programs --name ursim universalrobots/ursim_cb3
       ```
+  
+  ---
+  
   * **Network Setup:**
     To use the specific docker network, we can assign a static IP address to our URSim container:
     ```
@@ -56,6 +57,9 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
     ```
     Although the tutorial says that the VNC web server should be available at `http://192.168.56.101:6080/vnc.html`, I still can't open it.
     So, I still use the original one [Link](http://localhost:6080/vnc.html?host=localhost&port=6080)
+
+  ---
+  
   * **Script Startup:**  
     I followed the tutorial step-by-step, so I didn't use the `start_ursim.sh` script.  
     There's another issue that the ROS2 command `ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=192.168.56.101` would result in an error about the IP address.  
@@ -92,6 +96,8 @@ I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/e
       | ROS 2 → URSim | ROS driver connects to URSim | `127.0.0.1:30001–30004` (if ports are mapped) | Set `robot_ip:=127.0.0.1` in the launch command |
       | URSim → ROS 2 (reverse control) | External Control node connects back | Host IP visible to container (`172.17.0.1` or LAN IP) port `50002` | Configure this in the URSim GUI External Control node |
 
+  ---
+  
   * **The Final Command I Use**  
     Since my real-world experimental setup, the UR3 has a ROBOTIQ 2F-85 Gripper installed on it, I installed the ROBOTIQ Gripper URCap file into the URSim while I created the container.
     However, the ROBOTIQ Gripper URCap can only show the commands in URSim because URSim couldn't detect the gripper in the simulation world.
