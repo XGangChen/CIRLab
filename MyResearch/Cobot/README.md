@@ -1,6 +1,7 @@
 # Cobot-Human Collision Avoidance (UR3 + Kinect V2 + RealSense D435f)  
 
-> **Goal:** Design a safety algorithm for the Human-Robot workspace to avoid collisions. The experimental environment setup is using [UR3](https://www.universal-robots.com/download/manuals-cb-series/user/ur3/33/user-manual-ur3-cb-series-sw33-english-international/) as a collaborative robot to help the experimenter get something. Using Kinect V2 to detect human hand's 3D position, and using RealSense D435f to do human arm's pose estimation.
+> **Goal:**
+Design a safety algorithm for the Human-Robot workspace to avoid collisions. The experimental environment setup is using [UR3](https://www.universal-robots.com/download/manuals-cb-series/user/ur3/33/user-manual-ur3-cb-series-sw33-english-international/) as a collaborative robot, using Kinect V2 to detect human hand's 3D position, and using RealSense D435f to do human arm's pose estimation.
 
 ## Experimental Environment
 
