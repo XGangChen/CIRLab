@@ -12,7 +12,7 @@ I installed the packages of [KinectV2](https://github.com/XGangChen/CIRLab/tree/
   <summary>
     Troubleshooting
   </summary>
-  [https://chatgpt.com/share/68de2bf1-5fbc-800f-8a53-534d66b82783]
+  https://chatgpt.com/share/68de2bf1-5fbc-800f-8a53-534d66b82783
 </details>
 
 ---
