@@ -15,9 +15,7 @@ I installed the packages of [KinectV2](https://github.com/XGangChen/CIRLab/tree/
   https://chatgpt.com/share/68de2bf1-5fbc-800f-8a53-534d66b82783
 </details>
 
----
-
-## 2) Project Structure
+## 2) Repository Structure
 
 ```text
 cobot_human_safety/
@@ -570,3 +568,194 @@ Node(
 * **Optical vs link frames**: Publish **base→*_link** only; let the camera driver handle link→optical.
 
 ---
+
+---
+
+## 16) Integration Package: `safety_bringup` (Humble)
+
+If your UR3 driver is installed via **APT** at `/opt/ros/humble` and your KinectV2/RealSense/Robotiq packages live in `~/ros_ws`, the cleanest way to run everything is to add a tiny **bringup package** that includes the apt-installed launches and your local nodes into one session.
+
+### 16.1 Package skeleton
+
+```
+ros2_ws/src/safety_bringup/
+├─ package.xml
+├─ CMakeLists.txt
+├─ launch/
+│  └─ full_system.launch.py
+├─ config/
+│  └─ extrinsics.yaml         # copy or symlink from project config
+└─ rviz/
+   └─ cobot.rviz              # optional pre-configured RViz
+```
+
+**package.xml**
+
+```xml
+<?xml version="1.0"?>
+<package format="3">
+  <name>safety_bringup</name>
+  <version>0.0.1</version>
+  <description>Top-level bringup for UR3 + Kinect V2 + RealSense D435f</description>
+  <maintainer email="you@example.com">Your Name</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>ur_robot_driver</exec_depend>
+  <exec_depend>realsense2_camera</exec_depend>
+  <exec_depend>kinect2_bridge</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+</package>
+```
+
+**CMakeLists.txt**
+
+```cmake
+cmake_minimum_required(VERSION 3.5)
+project(safety_bringup)
+find_package(ament_cmake REQUIRED)
+install(DIRECTORY launch config rviz DESTINATION share/${PROJECT_NAME})
+ament_package()
+```
+
+### 16.2 One-shot launcher (includes APT ur_robot_driver)
+
+**launch/full_system.launch.py**
+
+```python
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration
+from launch.launch_description_sources import PythonLaunchDescriptionSource, FrontendLaunchDescriptionSource
+from ament_index_python.packages import get_package_share_directory
+from launch_ros.actions import Node
+import os, yaml
+
+
+def static_nodes_from_yaml(yaml_path):
+    nodes = []
+    if not os.path.isfile(yaml_path):
+        print(f"[safety_bringup] Extrinsics YAML not found: {yaml_path}")
+        return nodes
+    with open(yaml_path, 'r') as f:
+        data = yaml.safe_load(f)
+
+    def stf(xyz, rpy, parent, child, tag):
+        x,y,z = xyz
+        r,p,yaw = rpy
+        return Node(
+            package='tf2_ros', executable='static_transform_publisher', name=f'stf_{tag}',
+            arguments=[str(x), str(y), str(z), str(r), str(p), str(yaw), parent, child],
+            output='screen'
+        )
+
+    for key, cam in (data.get('cameras') or {}).items():
+        tag = f"{cam['parent'].replace('/','_')}_to_{cam['child'].replace('/','_')}"
+        nodes.append(stf(cam['xyz'], cam['rpy'], cam['parent'], cam['child'], tag))
+
+    tcp = data.get('tcp')
+    if tcp:
+        tag = f"{tcp['parent'].replace('/','_')}_to_{tcp['child'].replace('/','_')}"
+        nodes.append(stf(tcp['xyz'], tcp['rpy'], tcp['parent'], tcp['child'], tag))
+
+    world = data.get('world') or {}
+    if world.get('enabled', False):
+        tag = f"{world['parent'].replace('/','_')}_to_{world['child'].replace('/','_')}"
+        nodes.append(stf(world['xyz'], world['rpy'], world['parent'], world['child'], tag))
+
+    return nodes
+
+
+def generate_launch_description():
+    robot_ip = LaunchConfiguration('robot_ip')
+    extrinsics = LaunchConfiguration('extrinsics')
+    use_rviz = LaunchConfiguration('use_rviz')
+
+    declare_robot_ip = DeclareLaunchArgument('robot_ip', description='UR3 controller IP')
+    declare_extrinsics = DeclareLaunchArgument('extrinsics', default_value=os.path.join(get_package_share_directory('safety_bringup'), 'config', 'extrinsics.yaml'))
+    declare_use_rviz = DeclareLaunchArgument('use_rviz', default_value='true')
+
+    # UR driver (APT in /opt/ros/humble)
+    ur_pkg = get_package_share_directory('ur_robot_driver')
+    ur_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(ur_pkg, 'launch', 'ur_control.launch.py')),
+        launch_arguments={
+            'ur_type': 'ur3',
+            'robot_ip': robot_ip,
+            'launch_rviz': 'false',
+            'use_tool_communication': 'false'
+        }.items()
+    )
+
+    # RealSense D435f
+    rs_pkg = get_package_share_directory('realsense2_camera')
+    rs_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(rs_pkg, 'launch', 'rs_launch.py')),
+        launch_arguments={
+            'pointcloud.enable': 'true',
+            'align_depth.enable': 'true',
+            'publish_tf': 'true'
+        }.items()
+    )
+
+    # Kinect V2 (YAML frontend launch)
+    k_pkg = get_package_share_directory('kinect2_bridge')
+    k_launch = IncludeLaunchDescription(
+        FrontendLaunchDescriptionSource(os.path.join(k_pkg, 'launch', 'kinect2_bridge_launch.yaml'))
+    )
+
+    # Static extrinsics & TCP
+    extrinsics_path = os.path.join(get_package_share_directory('safety_bringup'), 'config', 'extrinsics.yaml')
+    stf_nodes = static_nodes_from_yaml(extrinsics_path)
+
+    # RViz (optional)
+    rviz_cfg = os.path.join(get_package_share_directory('safety_bringup'), 'rviz', 'cobot.rviz')
+    rviz = Node(
+        package='rviz2', executable='rviz2', name='rviz2',
+        arguments=['-d', rviz_cfg],
+        condition=IfCondition(use_rviz)
+    )
+
+    return LaunchDescription([
+        declare_robot_ip, declare_extrinsics, declare_use_rviz,
+        SetEnvironmentVariable('LIBFREENECT2_PIPELINE', 'gl'),
+        ur_launch,
+        rs_launch,
+        k_launch,
+        *stf_nodes,
+        rviz
+    ])
+```
+
+> **Note:** If your `kinect2_bridge` launch filename differs, adjust the path accordingly.
+
+### 16.3 Build + Run
+
+```bash
+# In your overlay where Kinect/RealSense/Robotiq live
+cd ~/ros_ws
+colcon build --packages-select safety_bringup --symlink-install
+source install/setup.bash
+
+# One-shot bringup (replace with your robot IP)
+ros2 launch safety_bringup full_system.launch.py robot_ip:=192.168.0.2 use_rviz:=true
+```
+
+### 16.4 Verifications
+
+```bash
+# Topics
+ros2 topic list | egrep -i 'joint_states|camera|kinect|realsense'
+
+# TF
+ros2 run tf2_tools view_frames
+ros2 run tf2_ros tf2_echo base tool0
+ros2 run tf2_ros tf2_echo base kinect2_link
+ros2 run tf2_ros tf2_echo base realsense_link
+```
+
+If you prefer **no new package**, you can still run each bringup in separate terminals and launch the static TF publisher from Section 15; this package just consolidates everything.
+
