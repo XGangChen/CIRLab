@@ -39,12 +39,12 @@ ros2 run rqt_image_view rqt_image_view
   source /opt/ros/humble/setup.bash
   source ~/ros_ws/install/setup.bash
   
-  ros2 launch realsense2_camera rs_launch.py \ 
-    camera_namespace:=cam1 \ 
-    camera_name:=cam1 \ 
-    serial_no:="_841612071686" \ 
-    rgb_camera.profile:=1280x720x30 \ 
-    depth_module.profile:=1280x720x30 \ 
+  ros2 launch realsense2_camera rs_launch.py \
+    camera_namespace:=cam1 \
+    camera_name:=cam1 \
+    serial_no:="_841612071686" \
+    rgb_camera.profile:=1280x720x30 \
+    depth_module.profile:=1280x720x30 \
     align_depth:=true
   ```
   Terminal B -> Camera 2
@@ -52,12 +52,12 @@ ros2 run rqt_image_view rqt_image_view
   source /opt/ros/humble/setup.bash
   source ~/ros_ws/install/setup.bash
   
-  ros2 launch realsense2_camera rs_launch.py \ 
-    camera_namespace:=cam2 \ 
-    camera_name:=cam2 \ 
-    serial_no:="_317622075526" \ 
-    rgb_camera.profile:=1280x720x30 \ 
-    depth_module.profile:=1280x720x30 \ 
+  ros2 launch realsense2_camera rs_launch.py \
+    camera_namespace:=cam2 \
+    camera_name:=cam2 \
+    serial_no:="_317622075526" \
+    rgb_camera.profile:=1280x720x30 \
+    depth_module.profile:=1280x720x30 \
     align_depth:=true
   ```
   > **Notes:** Set both `camera_namespace` and `camera_name` uniquely (e.g., `cam1`, `cam2`). This keeps topics and TF frames separate (e.g., `cam1_link`, `cam2_link`).
