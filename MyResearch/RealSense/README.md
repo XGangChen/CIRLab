@@ -66,7 +66,7 @@ ros2 run rqt_image_view rqt_image_view
 
 **3. Open rqt and view the images**  
   ```
-  rqt
+  ros2 run rqt_image_view rqt_image_view
   ```
 
 ---
