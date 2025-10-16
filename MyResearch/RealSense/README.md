@@ -60,5 +60,24 @@ ros2 run rqt_image_view rqt_image_view
     depth_module.profile:=1280x720x30 \
     align_depth:=true
   ```
-  > **Notes:**
-    Set both `camera_namespace` and `camera_name` uniquely (e.g., `cam1`, `cam2`). This keeps topics and TF frames separate (e.g., `cam1_link`, `cam2_link`).
+  > **Notes:** Set both `camera_namespace` and `camera_name` uniquely (e.g., `cam1`, `cam2`). This keeps topics and TF frames separate (e.g., `cam1_link`, `cam2_link`).
+
+---
+
+**3. Open rqt and view the images**  
+  ```
+  rqt
+  ```
+
+---
+
+**4. Optional: enable point clouds**  
+  Add this to the launch line if you want live RGB-D point clouds:
+  ```
+  pointcloud.enable:=true
+  ```
+  Then visualize in RViz2 (not rqt): 
+  ```
+  ros2 run rviz2 rviz2
+  # Add PointCloud2 for "/<ns>/depth/color/points".
+  ```
