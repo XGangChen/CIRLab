@@ -14,6 +14,10 @@ This script detects a wrist in the RGB image using MediaPipe, reads the aligned 
 5. **TF2** transforms that point into `platform_base`.
 6. Publish `/wrist_point_base` (geometry_msgs/PointStamped) and `/wrist_marker` (visualization_msgs/Marker).
 
+### Important pieces
+1. **Imports & QoS:**
+   * 
+
 
 ## mediapipe_wrist_debug.py
 
