@@ -15,9 +15,11 @@ This script detects a wrist in the RGB image using MediaPipe, reads the aligned 
 6. Publish `/wrist_point_base` (geometry_msgs/PointStamped) and `/wrist_marker` (visualization_msgs/Marker).
 
 ### Important pieces
-1. **Imports & QoS:**
-   * 
-
+**1. Imports & QoS:**  
+    * Uses `rclpy` for ROS 2, `cv_bridge` to convert ROS `Image` ↔ OpenCV, `image_geometry.PinholeCameraModel` for intrinsics math, `tf2_ros` for frame transforms, and MediaPipe Hands for 2D wrist detection.
+    * `sensor_qos` = Best Effort, Keep Last, depth 10, Volatile. This matches typical camera drivers’ “sensor data” QoS, so you don’t get QoS mismatches.
+**2. Node Setup**  
+    * 
 
 ## mediapipe_wrist_debug.py
 
