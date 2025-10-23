@@ -75,4 +75,139 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
 
 ## cam_info_tf_check.py
 
+This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the **TF transform** between two frames. It prints the focal lengths and principal point **once**, then reports the transform **every second** so you can confirm your extrinsics are being published correctly.
+
+---
+
+### What it does
+
+1. **Subscribes** to a `sensor_msgs/CameraInfo` topic (default **`/camera/cam2/color/image_raw/theora`** — you will almost certainly change this to your camera’s `.../camera_info` topic).
+2. **Parses intrinsics** from the `K` matrix:
+   - `fx = K[0,0]`, `fy = K[1,1]`, `cx = K[0,2]`, `cy = K[1,2]`.
+3. **Looks up TF** from **`target_frame`** (default `platform_base`) to **`source_frame`** (default `cam2_color_optical_frame`) once per second.
+4. **Logs** the translation `(x,y,z)` and quaternion `(x,y,z,w)` when available; otherwise, prints a warning until TF exists.
+
+> This node is read-only: it does not publish topics, only logs to the console.
+
+---
+
+### Parameters (ROS 2)
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `info_topic` | string | `/camera/cam2/color/image_raw/theora` | The **CameraInfo** topic to read. Change this to your camera’s `.../camera_info`. |
+| `source_frame` | string | `cam2_color_optical_frame` | The **child/source** frame (e.g., color optical frame). |
+| `target_frame` | string | `platform_base` | The **parent/target** frame (e.g., robot/world base). |
+
+> **QoS**: The subscription is created with `QoSProfile(depth=10)`. If you see no CameraInfo arriving, switch to `QoSPresetProfiles.SENSOR_DATA` to match camera drivers (see “Improvements” below).
+
+---
+
+### Running
+
+```bash
+python3 cam_info_tf_check.py \
+  --ros-args \
+  -p info_topic:=/camera/cam2/color/camera_info \
+  -p source_frame:=cam2_color_optical_frame \
+  -p target_frame:=platform_base
+```
+
+---
+
 ## wrist_to_base.py
+
+This node detects **hands** with **MediaPipe**, samples **aligned depth** at the **wrist** pixel, **deprojects** to 3D using the color camera intrinsics, transforms the point to a chosen **base frame** via **TF2**, and publishes both left/right `PointStamped` and RViz `Marker`(s). It also publishes an annotated **debug image**.
+
+> Script: `wrist_to_base.py` (Python, ROS 2 rclpy).
+
+---
+
+### What it does
+
+1. **Subscribe** (SENSOR_DATA QoS):
+   - Color image: `color_topic` (default `/camera/cam2/color/image_raw`)
+   - Aligned depth-to-color: `depth_topic` (default `/camera/cam2/aligned_depth_to_color/image_raw`)
+   - Color `CameraInfo`: `info_topic` (default `/camera/cam2/color/camera_info`)
+2. Run **MediaPipe Hands** (max 2). For each hand:
+   - Extract **wrist** landmark (index 0) → pixel `(u, v)`.
+   - Read a **robust depth** (meters) at `(u, v)` from an **adaptive window** (7, 11, 15) using **median of non‑zero** samples.
+   - **Deproject** `(u, v, z)` → `(Xc, Yc, Zc)` from `CameraInfo` intrinsics.
+   - **Transform** to base frame via TF2 (`target_frame` ← `source_frame`).
+   - **Publish**:
+     - `PointStamped` on `/wrist_left_point_base` or `/wrist_right_point_base`
+     - A **sphere Marker** (0.12 m) and a `MarkerArray`
+3. **Overlay** labels and depth on the debug image and publish to `/wrist/debug_image`.
+
+The node warns once if the depth’s `frame_id` differs from `source_frame` (likely **not aligned to color**) and if TF is missing.
+
+---
+
+### Parameters
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `color_topic` | string | `/camera/cam2/color/image_raw` | Color image (BGR8 expected). |
+| `depth_topic` | string | `/camera/cam2/aligned_depth_to_color/image_raw` | Depth aligned to **color** (uint16 mm or float32 m). |
+| `info_topic` | string | `/camera/cam2/color/camera_info` | Color `CameraInfo` for intrinsics. |
+| `source_frame` | string | `cam2_color_optical_frame` | Camera **optical** frame. |
+| `target_frame` | string | `platform_base` | Base/world frame to transform into. |
+| `min_det_conf` | double | `0.30` | MediaPipe detection confidence. |
+| `min_trk_conf` | double | `0.30` | MediaPipe tracking confidence. |
+
+**QoS:** Subscribers use `QoSPresetProfiles.SENSOR_DATA` (matches most camera drivers). Publishers use depth=10.
+
+---
+
+### Topics
+
+**Subscribed**  
+- `<color_topic>` — `sensor_msgs/Image` (BGR8)  
+- `<depth_topic>` — `sensor_msgs/Image` (`uint16` mm or `float32` m)  
+- `<info_topic>` — `sensor_msgs/CameraInfo`
+
+**Published**  
+- `/wrist_left_point_base`, `/wrist_right_point_base` — `geometry_msgs/PointStamped` (in `target_frame`)  
+- `/wrist_marker` — `visualization_msgs/Marker` (one per hand)  
+- `/wrist_marker_array` — `visualization_msgs/MarkerArray`  
+- `/wrist/debug_image` — `sensor_msgs/Image` (BGR8) annotated
+
+---
+
+### Running
+
+```bash
+python3 wrist_to_base.py \
+  --ros-args \
+  -p color_topic:=/camera/cam2/color/image_raw \
+  -p depth_topic:=/camera/cam2/aligned_depth_to_color/image_raw \
+  -p info_topic:=/camera/cam2/color/camera_info \
+  -p source_frame:=cam2_color_optical_frame \
+  -p target_frame:=platform_base
+```
+
+---
+
+### How it works (key internals)
+
+- **Depth robustness** — `robust_depth_at(u,v,depth,h,w)` tries windows **7, 11, 15**; takes the **median of non‑zero** pixels; returns `(z_meters, k_used)`; if none valid, returns `NaN`.  
+- **Deprojection** — Using `fx, fy, cx, cy` from `CameraInfo`:
+  \[
+    X_c = (u - c_x) \cdot z / f_x,\quad
+    Y_c = (v - c_y) \cdot z / f_y,\quad
+    Z_c = z
+  \]
+- **TF2** — Builds a `PointStamped` in `source_frame`, calls `lookup_transform(target, source, Time())`, then `do_transform_point` to get the **base** point.  
+- **Left/Right mapping** — Uses MediaPipe `multi_handedness` to label hands “Left”/“Right” and publish to the corresponding topics.
+- **Debug overlay** — Draws skeleton, wrist pixel, and prints `label` and `z` (meters).
+
+---
+
+### Notes / Known quirks
+
+- The overlay message currently prints `"... z=...m )"` (an extra `)`); safe to ignore or fix in the source.  
+- The log suggests `align_depth.enable:=true`; the typical RealSense flag is `align_depth:=true`.  
+- Markers are **persistent** (`lifetime=0`) and large (`0.12 m`) for visibility.  
+- Per‑hand markers are published **individually** *and* as a `MarkerArray`.
+
+---
