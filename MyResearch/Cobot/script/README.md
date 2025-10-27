@@ -212,19 +212,49 @@ This project is using ROS2 Humble to launch the RealSense D435f camera. I'll go 
 ```
 ros2 launch realsense2_camera rs_launch.py   camera_name:=cam2 enable_color:=true enable_depth:=true   align_depth.enable:=true initial_reset:=true
 ```
+This command runs the ROS2 RealSense driver with the exact options we need for wrist-depth.  
+- `camera_name:=cam2`: names/namespace for the node and topics (e.g. we put the node under a camera namespace -> `/camera/cam2/...`).
+- `enable_color:=true`: publish RGB frames (e.g. `/.../color/image_raw` and `/.../color/camera_info`).
+- `enable_depth:=true`: publish depth frames.
+- `align_depth.enable:=true`: **aligns the depth map to the color camera** and creates the topic `/.../aligned_depth_to_color/image_raw` with `frame_id: cam2_color_optical_frame`.
+  - This is critical so the wrist pixel `(u,v)` from the color image corresponds to the same pixel in the depth image.
+- `initial_reset:=true`: hard-resets the camera at startup (helpful if the device was left in a bad state or after USB hiccups), ensuring clean streaming and correct intrinsics.
+
+---
 
 ## TFtree2 Environment Setup
 ```
 ros2 run tf2_ros static_transform_publisher   0 0 1.25 3.14159265 -3.14159265 0  platform_base cam2_color_optical_frame
 ```
+This command publishes a fixed TF transform from your table frame to the camera’s optical frame.
+- Translation `0 0 1.25`: `x y z`, the camera origin is 1.25 m above platform_base.
+- Rotation `π −π 0`: `roll pitch yaw`,  rotate 180° about X, then 180° about Y.
+  Net effect is equivalent to a 180° yaw: it flips both X and Y in the camera frame (turns it “upside-down” in-plane).
+
+---
 
 ## Using RQT to See the Images
 ```
 ros2 run rqt_image_view rqt_image_view
 ```
+This command launches the rqt Image View GUI so you can preview any sensor_msgs/Image topic in real time.
+- Pick a topic from the dropdown (e.g. `/camera/cam2/color/image_raw`, `/camera/cam2/aligned_depth_to_color/image_raw`)
+- It subscribes and shows the frames live—great for checking if your pipeline is actually publishing and what it looks like.
+- To check the topic exists and is active: `ros2 topic list | grep image` and `ros2 topic hz <topic>`.
+
+---
 
 ## Using RViz2 to Get the Whole Environment
 ```
 rviv2
+# or
+ros2 run rviz2 rviz2
 ```
+Launch the RViz2 and set up:  
+1. In RViz, set Fixed Frame to `platform_base` (top left → “Global Options”).
+2. Adds displays:
+   - TF (to see frames)
+   - Marker with topic `/wrist_marker` (enable namespace `wrist`)
+   - (optional) MarkerArray with topic `/wrist_marker_array`
+   - (optional) Image with topic `/wrist/debug_image` to see the overlay
 
