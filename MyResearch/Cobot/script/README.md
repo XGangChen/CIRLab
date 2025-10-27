@@ -25,7 +25,7 @@ We need to launch the camera before running these scripts. Please check it out.
 ---
 
 # <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="VS Code Icon" width="30"> Scripts
-## <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Real-sense-logo-rgb.png" alt="RealSense Logo" height="25"> Camera
+## <img src="https://www.intelrealsense.com/wp-content/uploads/2020/09/intel-realsense-logo-360px.png" alt="RealSense Logo" height="25"> Camera
 ### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_mediapipe_wrist_debug.py
 
 This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stream, and color **CameraInfo**, runs **MediaPipe Hands** to detect up to **two** hands, overlays wrist landmarks and metrics (depth `z` and Euclidean range `R`) on the color image, and publishes a debug image you can view in RViz or `rqt_image_view`.
