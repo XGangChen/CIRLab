@@ -8,10 +8,10 @@ We need to launch the camera before running these scripts. Please check it out.
 # Table of Contents
 - Python Scripts
   - Camera
-    - [mediapipe_wrist_debug.py](#mediapipe_wrist_debugpy)
-    - [cam_info_tf_check.py](#cam_info_tf_checkpy)
-    - [wrist_to_base.py](#wrist_to_basepy)
-- [ROS2 Launch & Tools](#ROS2Launch&Tools)
+    - [mediapipe_wrist_debug.py](#mediapipe_wrist_debug-py)
+    - [cam_info_tf_check.py](#cam_info_tf_check-py)
+    - [wrist_to_base.py](#wrist_to_base-py)
+- [ROS2 Launch & Tools](#ROS2-Launch-&-Tools)
   - 
 
 
