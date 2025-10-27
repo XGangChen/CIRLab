@@ -6,11 +6,11 @@ We need to launch the camera before running these scripts. Please check it out.
 > I run all the Python scripts in Python3.10-venv. Since we're using ROS, do not use Conda to avoid unnecessary troubles. My software setup is Ubuntu 22.04 LTS and ROS2 Humble, so we're using Python3.10. 
 
 # Table of Contents
-* Python Scripts
-  * Camera
-    * [mediapipe_wrist_debug.py](#mediapipe_wrist_debug-py)
-    * [cam_info_tf_check.py](#cam_info_tf_check-py)
-    * [wrist_to_base.py](#wrist_to_base-py)
+* [Python Scripts](#python-scripts)
+  * [Camera](#camera)
+    * [mediapipe_wrist_debug.py](#-mediapipe_wrist_debug-py)
+    * [cam_info_tf_check.py](#-cam_info_tf_check-py)
+    * [wrist_to_base.py](#-wrist_to_base-py)
 * [ROS2 Launch & Tools](#ros2-launch-&-tools)
   * 
 
