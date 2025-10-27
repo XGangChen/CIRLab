@@ -6,11 +6,14 @@ We need to launch the camera before running these scripts. Please check it out.
 > I run all the Python scripts in Python3.10-venv. Since we're using ROS, do not use Conda to avoid unnecessary troubles. My software setup is Ubuntu 22.04 LTS and ROS2 Humble, so we're using Python3.10. 
 
 # Table of Contents
-* [Python Scripts](#python-scripts)
-  * [Camera](#camera)
-    * [mediapipe_wrist_debug.py](#-mediapipe_wrist_debugpy)
-    * [cam_info_tf_check.py](#-cam_info_tf_checkpy)
-    * [wrist_to_base.py](#-wrist_to_basepy)
+* [Python Scripts](#-scripts)
+  * [Camera](#-camera)
+    * [D435f_mediapipe_wrist_debug.py](#-d435f_mediapipe_wrist_debugpy)
+    * [D435f_cam_info_tf_check.py](#-d435f_cam_info_tf_checkpy)
+    * [D435f_wrist_to_base.py](#-d435f_wrist_to_basepy)
+  * [UR3](#ur3)
+    * [D435f_UR_human_detect.py](#-d435f_ur_human_detectpy)
+    * [D435f_UR_pose_ROSnode.py](#-d435f_ur_pose_rosnode.py)
 * [ROS2 Launch & Tools](#-ros2-launch--tools)
   * [Launch the Camera](#launch-the-camera)
   * [TFtree2 Environment Setup](#tftree2-environment-setup)
@@ -21,9 +24,9 @@ We need to launch the camera before running these scripts. Please check it out.
 
 ---
 
-# Python Scripts
-## Camera
-### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> mediapipe_wrist_debug.py
+# <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="VS Code Icon" width="30"> Scripts
+## <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Real-sense-logo-rgb.png" alt="RealSense Logo" height="25"> Camera
+### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_mediapipe_wrist_debug.py
 
 This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stream, and color **CameraInfo**, runs **MediaPipe Hands** to detect up to **two** hands, overlays wrist landmarks and metrics (depth `z` and Euclidean range `R`) on the color image, and publishes a debug image you can view in RViz or `rqt_image_view`.
 
@@ -201,6 +204,13 @@ python3 wrist_to_base.py \
 - The log suggests `align_depth.enable:=true`; the typical RealSense flag is `align_depth:=true`.  
 - Markers are **persistent** (`lifetime=0`) and large (`0.12 m`) for visibility.  
 - Per‑hand markers are published **individually** *and* as a `MarkerArray`.
+
+---
+
+## <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Universal_robots_logo.svg" alt="Universal Robots Icon" width="25"> UR3
+
+### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_human_detect.py
+### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_pose_ROSnode.py
 
 ---
 
