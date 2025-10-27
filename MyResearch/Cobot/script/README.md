@@ -11,7 +11,7 @@ We need to launch the camera before running these scripts. Please check it out.
     * [mediapipe_wrist_debug.py](#-mediapipe_wrist_debugpy)
     * [cam_info_tf_check.py](#-cam_info_tf_checkpy)
     * [wrist_to_base.py](#-wrist_to_basepy)
-* [ROS2 Launch & Tools](#ros2-launch--tools)
+* [ROS2 Launch & Tools](#-ros2-launch--tools)
   * [Launch the Camera](#launch-the-camera)
   * [TFtree2 Environment Setup](#tftree2-environment-setup)
   * [Using RQT to See the Images](#using-rqt-to-see-the-images)
