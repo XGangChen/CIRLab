@@ -6,29 +6,38 @@ We need to launch the camera before running these scripts. Please check it out.
 > I run all the Python scripts in Python3.10-venv. Since we're using ROS, do not use Conda to avoid unnecessary troubles. My software setup is Ubuntu 22.04 LTS and ROS2 Humble, so we're using Python3.10. 
 
 # Table of Contents
-- [mediapipe_wrist_debug.py](#mediapipe_wrist_debugpy)
+- Python Scripts
+  - Camera
+    - [mediapipe_wrist_debug.py](#mediapipe_wrist_debugpy)
+    - [cam_info_tf_check.py](#cam_info_tf_checkpy)
+    - [wrist_to_base.py](#wrist_to_basepy)
+- [ROS2 Launch & Tools](#ROS2Launch&Tools)
+  - 
+
 
 
 ---
 
-## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> mediapipe_wrist_debug.py
+# Python Scripts
+## Camera
+### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> mediapipe_wrist_debug.py
 
 This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stream, and color **CameraInfo**, runs **MediaPipe Hands** to detect up to **two** hands, overlays wrist landmarks and metrics (depth `z` and Euclidean range `R`) on the color image, and publishes a debug image you can view in RViz or `rqt_image_view`.
 
 > This node is **for visualization/debug**: it does **not** publish 3D points or TF. Use it to verify hands, depth alignment, and camera intrinsics.
 
-### Features
+#### Features
 
 - **Hands detection (max 2)** via MediaPipe with lightweight tracking.
 - **Robust depth**: 7×7 patch median (ignores 0s) at the wrist pixel.
 - **Deprojection** using **CameraInfo** (pinhole intrinsics) to compute camera-frame `(X, Y, Z)` and range `R = √(X²+Y²+Z²)`.
-- **On-image overlays**: wrist pixel, hand connections, handedness label (“Left/Right”), `z` (meters) and `R` (meters).
+- **On-image overlays**: wrist pixel, hand connections, handedness label (“Left/Right”), `z` (meters), and `R` (meters).
 - **Guardrails**:
   - Accepts depth in `uint16` (mm → m) or `float32` (m).
   - Warns if depth `frame_id` isn’t the expected **color optical frame** (misalignment hint).
   - Tolerant to missing depth/intrinsics (still draws landmarks, just omits numbers).
 
-### Topics & Parameters
+#### Topics & Parameters
 
 - **Parameters (declare via ROS 2 params)**  
   - `color_topic` (string, default: `/camera/cam2/color/image_raw`)
@@ -45,7 +54,7 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
 - **Published**
   - `/wrist/debug_image` (`sensor_msgs/Image`, BGR8) — the annotated color image.
 
-### Running
+#### Running
 
 - Quick test (direct Python)
   ```bash
@@ -57,7 +66,7 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
   ```
   > Make sure the camera has been launched and the TF tree has been set up.
 
-### How it works (algorithm)
+#### How it works (algorithm)
 
 1. Convert color frame (BGR) → RGB, run **MediaPipe Hands** (`max_num_hands=2`).
 2. For each detected hand:
@@ -71,11 +80,11 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
 
 ---
 
-## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> cam_info_tf_check.py
+### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> cam_info_tf_check.py
 
 This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the **TF transform** between two frames. It prints the focal lengths and principal point **once**, then reports the transform **every second** so you can confirm your extrinsics are being published correctly.
 
-### What it does
+#### What it does
 
 1. **Subscribes** to a `sensor_msgs/CameraInfo` topic (default **`/camera/cam2/color/image_raw/theora`** — you will almost certainly change this to your camera’s `.../camera_info` topic).
 2. **Parses intrinsics** from the `K` matrix:
@@ -85,7 +94,7 @@ This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the 
 
 > This node is read-only: it does not publish topics, only logs to the console.
 
-### Parameters (ROS 2)
+#### Parameters (ROS 2)
 
 | Name | Type | Default | Description |
 |---|---|---|---|
@@ -95,7 +104,7 @@ This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the 
 
 > **QoS**: The subscription is created with `QoSProfile(depth=10)`. If you see no CameraInfo arriving, switch to `QoSPresetProfiles.SENSOR_DATA` to match camera drivers (see “Improvements” below).
 
-### Running
+#### Running
 
 ```bash
 python3 cam_info_tf_check.py \
@@ -107,13 +116,13 @@ python3 cam_info_tf_check.py \
 
 ---
 
-## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> wrist_to_base.py
+### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> wrist_to_base.py
 
 This node detects **hands** with **MediaPipe**, samples **aligned depth** at the **wrist** pixel, **deprojects** to 3D using the color camera intrinsics, transforms the point to a chosen **base frame** via **TF2**, and publishes both left/right `PointStamped` and RViz `Marker`(s). It also publishes an annotated **debug image**.
 
 > Script: `wrist_to_base.py` (Python, ROS 2 rclpy).
 
-### What it does
+#### What it does
 
 1. **Subscribe** (SENSOR_DATA QoS):
    - Color image: `color_topic` (default `/camera/cam2/color/image_raw`)
@@ -131,7 +140,7 @@ This node detects **hands** with **MediaPipe**, samples **aligned depth** at the
 
 The node warns once if the depth’s `frame_id` differs from `source_frame` (likely **not aligned to color**) and if TF is missing.
 
-### Parameters
+#### Parameters
 
 | Name | Type | Default | Description |
 |---|---|---|---|
@@ -145,7 +154,7 @@ The node warns once if the depth’s `frame_id` differs from `source_frame` (lik
 
 **QoS:** Subscribers use `QoSPresetProfiles.SENSOR_DATA` (matches most camera drivers). Publishers use depth=10.
 
-### Topics
+#### Topics
 
 **Subscribed**  
 - `<color_topic>` — `sensor_msgs/Image` (BGR8)  
@@ -158,7 +167,7 @@ The node warns once if the depth’s `frame_id` differs from `source_frame` (lik
 - `/wrist_marker_array` — `visualization_msgs/MarkerArray`  
 - `/wrist/debug_image` — `sensor_msgs/Image` (BGR8) annotated
 
-### Running
+#### Running
 
 ```bash
 python3 wrist_to_base.py \
@@ -170,7 +179,7 @@ python3 wrist_to_base.py \
   -p target_frame:=platform_base
 ```
 
-### How it works (key internals)
+#### How it works (key internals)
 
 - **Depth robustness** — `robust_depth_at(u,v,depth,h,w)` tries windows **7, 11, 15**; takes the **median of non‑zero** pixels; returns `(z_meters, k_used)`; if none valid, returns `NaN`.  
 - **Deprojection** — Using `fx, fy, cx, cy` from `CameraInfo`:
@@ -183,7 +192,7 @@ python3 wrist_to_base.py \
 - **Left/Right mapping** — Uses MediaPipe `multi_handedness` to label hands “Left”/“Right” and publish to the corresponding topics.
 - **Debug overlay** — Draws skeleton, wrist pixel, and prints `label` and `z` (meters).
 
-### Notes / Known quirks
+#### Notes / Known quirks
 
 - The overlay message currently prints `"... z=...m )"` (an extra `)`); safe to ignore or fix in the source.  
 - The log suggests `align_depth.enable:=true`; the typical RealSense flag is `align_depth:=true`.  
