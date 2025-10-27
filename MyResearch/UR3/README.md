@@ -1,4 +1,4 @@
-# UR3 ROS2 Humble Environment
+# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/Universal_robots_logo.svg" alt="Universal Robots Icon" width="30"> UR3 ROS2 Humble Environment
 [The Universal Robots ROS2 Driver GitHub](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/tree/humble)
 ## Installation
 ### Setup for real-time scheduling
