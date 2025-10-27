@@ -210,7 +210,174 @@ python3 wrist_to_base.py \
 ## <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/Universal_robots_logo.svg" alt="Universal Robots Icon" width="25"> UR3
 
 ### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_human_detect.py
+
+This node fuses **MediaPipe Hands** (human wrists) and **YOLO** (UR3 joint detections) with **aligned depth** and **camera intrinsics** to compute 3D points in the **camera optical frame**, transforms them to a **base/world** frame via **TF2**, and publishes both **points** and **RViz markers**. It also publishes an **annotated debug image** for quick verification.
+
+#### Features
+
+- **Human wrist tracking**: MediaPipe Hands (max 2), robust depth sampling, 3D point projected to base.
+- **UR3 joint detection**: YOLO model (configurable), best-per-class picking, 3D per-joint points and a **skeleton** line in base.
+- **Robust depth** at a pixel via **adaptive window** (7→11→15) using median of non-zero samples.
+- **Deprojection** using `CameraInfo` (pinhole `fx, fy, cx, cy`).
+- **TF2 transform** from camera optical frame (**source**) to base/world (**target**).
+- **Debug overlay**: hand skeleton, wrist dots, UR3 bboxes, 2D skeleton, and depth text.
+- **QoS** tuned for sensors: subscribers use `SENSOR_DATA` profile.
+
+#### Parameters
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `color_topic` | string | `/camera/cam2/color/image_raw` | Color image (BGR8). |
+| `depth_topic` | string | `/camera/cam2/aligned_depth_to_color/image_raw` | Depth aligned to **color** (`uint16` mm or `float32` m). |
+| `info_topic` | string | `/camera/cam2/color/camera_info` | Camera intrinsics for **color**. |
+| `source_frame` | string | `cam2_color_optical_frame` | Camera optical frame (child). |
+| `target_frame` | string | `platform_base` | Base/world frame (parent). |
+| `min_det_conf` | double | `0.30` | MediaPipe detection confidence. |
+| `min_trk_conf` | double | `0.30` | MediaPipe tracking confidence. |
+| `yolo_model_path` | string | `/media/.../UR_pose_best.pt` | YOLO weights for UR3 joints. |
+| `yolo_conf` | double | `0.25` | YOLO confidence threshold. |
+| `yolo_imgsz` | int | `640` | YOLO input size. |
+| `ur3_class_names` | string | `UR_joints.csv` | **CSV string** of class names in link order, e.g. `base,shoulder,elbow1,elbow2,elbow3,wrist`. *Note:* despite the name, the script expects a **comma‑separated list**, not a file path. |
+
+**QoS**: Subscriptions use `QoSPresetProfiles.SENSOR_DATA`. Publishers use a queue depth of 10.
+
+#### Topics
+
+**Subscribed**
+- `<color_topic>` — `sensor_msgs/Image` (BGR8)
+- `<depth_topic>` — `sensor_msgs/Image` (`uint16` mm or `float32` m)
+- `<info_topic>` — `sensor_msgs/CameraInfo`
+
+**Published**
+- **Human wrists**: `/wrist_left_point_base`, `/wrist_right_point_base` (`geometry_msgs/PointStamped`, in `target_frame`)
+- **UR3 joints**: `/ur3/joint_markers` (`MarkerArray` spheres), `/ur3/skeleton` (`Marker` LINE_STRIP)
+- **Debug**: `/wrist/debug_image` (`sensor_msgs/Image`, annotated BGR8)
+- **(Optional)** per-joint `PointStamped`: `/ur3/{base,shoulder,elbow1,elbow2,elbow3,wrist}_point`
+
+#### How it works (pipeline)
+
+1. **Sync state**: wait until **CameraInfo** initializes a `PinholeCameraModel` and a **depth** frame is cached.
+2. **Human wrists (MediaPipe)**:
+   - Detect up to 2 hands, get **wrist landmark** (index 0) → pixel `(u,v)`.
+   - **Robust depth**: median of non-zero pixels over windows 7, 11, 15.
+   - **Deproject** `(u,v,z)` → `(Xc,Yc,Zc)` in `source_frame` (camera optical).
+   - **TF2** to `target_frame`; publish `PointStamped` and a persistent sphere `Marker` (Left/Right).
+3. **UR3 joints (YOLO)**:
+   - Run YOLO on the color frame; pick **best box per class** among the expected names.
+   - For each joint: compute center pixel, robust depth, deproject, **TF2 to base**, publish a sphere `Marker`.
+   - Build a **LINE_STRIP** skeleton through the available joints in order `base→shoulder→elbow1→elbow2→elbow3→wrist`.
+   - Overlay 2D bboxes, confidences, and a 2D skeleton on the debug image.
+4. **Debug image** is published every frame even if depth/intrinsics are not yet ready (draws what’s available).
+
+#### Running
+
+```bash
+python3 D435f_UR_human_detect.py \
+  --ros-args \
+  -p color_topic:=/camera/cam2/color/image_raw \
+  -p depth_topic:=/camera/cam2/aligned_depth_to_color/image_raw \
+  -p info_topic:=/camera/cam2/color/camera_info \
+  -p source_frame:=cam2_color_optical_frame \
+  -p target_frame:=platform_base \
+  -p yolo_model_path:=/path/to/UR_pose_best.pt \
+  -p ur3_class_names:="base,shoulder,elbow1,elbow2,elbow3,wrist"
+```
+
+#### Camera & TF prerequisites
+
+- **Aligned depth** to color must be enabled (RealSense example):
+  ```bash
+  ros2 launch realsense2_camera rs_launch.py \
+    align_depth:=true pointcloud.enable:=false color0.enable:=true depth0.enable:=true
+  ```
+- Provide TF from **`target_frame`** (parent) to **`source_frame`** (child) (URDF + `robot_state_publisher` or static):
+  ```bash
+  ros2 run tf2_ros static_transform_publisher \
+    0 0 0  0 0 0  platform_base cam2_color_optical_frame
+  ```
+
+> If you see a warning like “Depth frame_id != source_frame”, your depth isn’t aligned to the color optical frame; enable alignment or change `source_frame` to match.
+
+---
+
 ### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_pose_ROSnode.py
+
+This ROS 2 node subscribes to a **color image** stream, runs an **Ultralytics YOLO (pose)** model to detect the **UR3 robot joints** in 2D, overlays a skeleton on the image, and publishes:
+- an **annotated image** you can view in RViz or `rqt_image_view`,
+- a **Float32MultiArray** containing the **6×3 keypoints** (`x, y, confidence`) for the **best** detected UR3 instance.
+
+> This script does **not** compute depth, 3D points, or TF. It is a light, real‑time **2D pose** publisher meant to feed downstream nodes or for visualization.
+
+#### What it does
+
+1. Subscribes to a color image (default **`/cam2/color/image_raw`**) with a camera‑friendly QoS (BEST_EFFORT, KEEP_LAST, depth=5).
+2. Loads an Ultralytics **YOLO pose** model (default path comes from `--model` or `UR_MODEL` env) and runs inference per frame.
+3. If multiple detections exist, it **selects the best instance** using the **mean keypoint confidence** and **publishes only one** set of 6 keypoints.
+4. Publishes:
+   - **Annotated image** (`sensor_msgs/Image`) on `/ur3_pose/annotated` (same timestamp/header as input).
+   - **Keypoints** (`std_msgs/Float32MultiArray`) on `/ur3_pose/keypoints` with a layout describing a `(6,3)` array.
+5. Applies a simple **FPS throttle** (max ~30 FPS) so inference doesn’t backlog.
+
+#### Topics
+
+**Subscribed**
+- `Image` — **color** image (BGR8): default **`/cam2/color/image_raw`**
+
+**Published**
+- `Image` — annotated color image: default **`/ur3_pose/annotated`**
+- `Float32MultiArray` — keypoints (6 joints × 3 fields): default **`/ur3_pose/keypoints`**
+
+**Joint order / skeleton**
+- `JOINT_NAMES = [base, shoulder, elbow1, elbow2, elbow3, wrist]`
+- `SKELETON = [(0,1), (1,2), (2,3), (3,4), (4,5)]` (drawn only when both endpoint confidences > 0.5)
+
+#### Message format — keypoints
+
+- Type: `std_msgs/Float32MultiArray`
+- Layout (`layout.dim`):
+  - `dim[0]`: label=`"joints"`, size=`6`,  stride=`18`
+  - `dim[1]`: label=`"fields(x,y,conf)"`, size=`3`, stride=`3`
+- Data: flattened list of 18 `float32`: `[x0, y0, c0, x1, y1, c1, ..., x5, y5, c5]`
+
+If **no detection**, an empty array (`data=[]`) is published.
+
+#### Parameters / CLI / Environment
+
+You can set options via **CLI args** (preferred) or **environment variables**. The parser tolerates extra `--ros-args` so you can launch it like any ROS node.
+
+| CLI arg | Env var | Default | Meaning |
+|---|---|---:|---|
+| `--model` | `UR_MODEL` | `"/media/.../UR_pose_best.pt"` | Path to an **Ultralytics YOLO pose** weights file. |
+| `--image-topic` | `UR_IMAGE_TOPIC` | `"/cam2/color/image_raw"` | Input color image topic. |
+| `--out-image-topic` | `UR_OUT_IMG` | `"/ur3_pose/annotated"` | Output annotated image topic. |
+| `--out-kpt-topic` | `UR_OUT_KPT` | `"/ur3_pose/keypoints"` | Output keypoints topic. |
+| `--conf` | `UR_CONF` | `0.30` | YOLO detection confidence threshold. |
+
+> Device selection is automatic: **CUDA** if available, otherwise **CPU**.
+
+#### QoS
+
+The subscriber uses a camera‑friendly **BEST_EFFORT** / **KEEP_LAST** / **depth=5** profile to match most camera drivers and avoid reliability mismatches. The annotated image is published with the same QoS; the keypoints publisher uses a small queue (depth=10).
+
+#### Running
+
+Direct (handy for VS Code)
+```bash
+python3 D435f_UR_pose_ROSnode.py \
+  --model /path/to/UR_pose_best.pt \
+  --image-topic /cam2/color/image_raw \
+  --out-image-topic /ur3_pose/annotated \
+  --out-kpt-topic /ur3_pose/keypoints \
+  --conf 0.30
+# Extra flags like --ros-args are tolerated (ignored by the parser)
+```
+
+#### Performance tips
+
+- Use a smaller input image (camera resolution) or a lighter YOLO model to raise FPS.
+- Increase `--conf` to filter weak detections.
+- Prefer **CUDA** if available; make sure PyTorch is installed with the right CUDA version.
+- The node already throttles to ~30 FPS; if your camera publishes faster, you won’t process every frame.
 
 ---
 
