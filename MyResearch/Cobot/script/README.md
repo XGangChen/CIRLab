@@ -207,7 +207,7 @@ python3 wrist_to_base.py \
 
 ---
 
-## <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Universal_robots_logo.svg" alt="Universal Robots Icon" width="25"> UR3
+## <img src="https://commons.wikimedia.org/wiki/File:Universal_robots_logo.svg" alt="Universal Robots Icon" width="25"> UR3
 
 ### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_human_detect.py
 ### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_pose_ROSnode.py
