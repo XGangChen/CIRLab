@@ -60,8 +60,6 @@ sudo nano /etc/security/limits.conf
 
 ### Setup URSim with Docker
   The Docker Hub that the tutorial provided is for e-series. Since I'm using UR3, which is the older one, I use this: [ursim_cb3](https://hub.docker.com/r/universalrobots/ursim_cb3)  
-
-  ---
   
   * **Run the image:**
     `docker run --rm -it universalrobots/ursim_cb3`
