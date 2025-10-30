@@ -17,7 +17,46 @@ sudo nano /etc/security/limits.conf
 #@realtime hard priority 99
 #@realtime hard memlock 102400
 ```
-I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/real_time.html#optional-disable-cpu-speed-scaling)  
+> I didn't do the optional step:[Disable CPU speed scaling](https://docs.ros.org/en/ros2_packages/humble/api/ur_robot_driver/doc/installation/real_time.html#optional-disable-cpu-speed-scaling)  
+
+---
+
+### Launch the ur_robot_driver
+
+- Network Setup:
+  - UR control box:
+    1. Connect the UR control box directly to the remote PC with an Ethernet cable.
+    2. Open the network settings from the UR teach pendant (Setup Robot -> Network) and enter these settings:
+    ```
+    IP address: 192.168.1.102
+    Subnet mask: 255.255.255.0
+    Default gateway: 192.168.1.1
+    Preferred DNS server: 192.168.1.1
+    Alternative DNS server: 0.0.0.0
+    ```
+  - Remote PC:
+    1. Turn off all network devices except the “wired connection”.
+    2. Open Network Settings and create a new Wired connection with these settings. You may want to name this new connection UR or something similar:
+    ```
+    IPv4
+    Manual
+    Address: 192.168.1.101
+    Netmask: 255.255.255.0
+    Gateway: 192.168.1.1
+    ```
+  - Verify the connection from the PC with e.g., ping.
+    ```
+    ping 192.168.1.102
+    ```
+- Launch the driver:
+  ```bash
+  # Run the ROS2 command to see the robot in RViz:
+  ros2 launch ur_robot_driver ur_control.launch.py \
+    ur_type:=ur3 \
+    robot_ip:=192.168.1.102 \
+  ```
+
+---
 
 ### Setup URSim with Docker
   The Docker Hub that the tutorial provided is for e-series. Since I'm using UR3, which is the older one, I use this: [ursim_cb3](https://hub.docker.com/r/universalrobots/ursim_cb3)  
