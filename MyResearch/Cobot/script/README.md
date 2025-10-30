@@ -12,7 +12,7 @@ We need to launch the camera before running these scripts. Please check it out.
   * [D435f_wrist_to_base.py](#-d435f_wrist_to_basepy)
 * [UR3](#ur3)
   * [D435f_UR_human_detect.py](#-d435f_ur_human_detectpy)
-  * [D435f_UR_pose_ROSnode.py](#-d435f_ur_pose_rosnode.py)
+  * [D435f_UR_pose_ROSnode.py](#-d435f_ur_pose_rosnodepy)
 * [ROS2 Launch & Tools](#-ros2-launch--tools)
   * [Launch the Camera](#launch-the-camera)
   * [TFtree2 Environment Setup](#tftree2-environment-setup)
