@@ -6,14 +6,13 @@ We need to launch the camera before running these scripts. Please check it out.
 > I run all the Python scripts in Python3.10-venv. Since we're using ROS, do not use Conda to avoid unnecessary troubles. My software setup is Ubuntu 22.04 LTS and ROS2 Humble, so we're using Python3.10. 
 
 # Table of Contents
-* [Python Scripts](#-scripts)
-  * [Camera](#-camera)
-    * [D435f_mediapipe_wrist_debug.py](#-d435f_mediapipe_wrist_debugpy)
-    * [D435f_cam_info_tf_check.py](#-d435f_cam_info_tf_checkpy)
-    * [D435f_wrist_to_base.py](#-d435f_wrist_to_basepy)
-  * [UR3](#ur3)
-    * [D435f_UR_human_detect.py](#-d435f_ur_human_detectpy)
-    * [D435f_UR_pose_ROSnode.py](#-d435f_ur_pose_rosnode.py)
+* [Camera](#-camera)
+  * [D435f_mediapipe_wrist_debug.py](#-d435f_mediapipe_wrist_debugpy)
+  * [D435f_cam_info_tf_check.py](#-d435f_cam_info_tf_checkpy)
+  * [D435f_wrist_to_base.py](#-d435f_wrist_to_basepy)
+* [UR3](#ur3)
+  * [D435f_UR_human_detect.py](#-d435f_ur_human_detectpy)
+  * [D435f_UR_pose_ROSnode.py](#-d435f_ur_pose_rosnode.py)
 * [ROS2 Launch & Tools](#-ros2-launch--tools)
   * [Launch the Camera](#launch-the-camera)
   * [TFtree2 Environment Setup](#tftree2-environment-setup)
@@ -24,15 +23,14 @@ We need to launch the camera before running these scripts. Please check it out.
 
 ---
 
-# <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="VS Code Icon" width="30"> Scripts
-## <img src="https://www.intelrealsense.com/wp-content/uploads/2020/09/intel-realsense-logo-360px.png" alt="RealSense Logo" height="25"> Camera
-### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_mediapipe_wrist_debug.py
+# <img src="https://www.intelrealsense.com/wp-content/uploads/2020/09/intel-realsense-logo-360px.png" alt="RealSense Logo" height="25"> Camera
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_mediapipe_wrist_debug.py
 
 This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stream, and color **CameraInfo**, runs **MediaPipe Hands** to detect up to **two** hands, overlays wrist landmarks and metrics (depth `z` and Euclidean range `R`) on the color image, and publishes a debug image you can view in RViz or `rqt_image_view`.
 
 > This node is **for visualization/debug**: it does **not** publish 3D points or TF. Use it to verify hands, depth alignment, and camera intrinsics.
 
-#### Features
+### Features
 
 - **Hands detection (max 2)** via MediaPipe with lightweight tracking.
 - **Robust depth**: 7×7 patch median (ignores 0s) at the wrist pixel.
@@ -43,7 +41,7 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
   - Warns if depth `frame_id` isn’t the expected **color optical frame** (misalignment hint).
   - Tolerant to missing depth/intrinsics (still draws landmarks, just omits numbers).
 
-#### Topics & Parameters
+### Topics & Parameters
 
 - **Parameters (declare via ROS 2 params)**  
   - `color_topic` (string, default: `/camera/cam2/color/image_raw`)
@@ -60,7 +58,7 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
 - **Published**
   - `/wrist/debug_image` (`sensor_msgs/Image`, BGR8) — the annotated color image.
 
-#### Running
+### Running
 
 - Quick test (direct Python)
   ```bash
@@ -72,7 +70,7 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
   ```
   > Make sure the camera has been launched and the TF tree has been set up.
 
-#### How it works (algorithm)
+### How it works (algorithm)
 
 1. Convert color frame (BGR) → RGB, run **MediaPipe Hands** (`max_num_hands=2`).
 2. For each detected hand:
@@ -86,11 +84,11 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
 
 ---
 
-### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> cam_info_tf_check.py
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> cam_info_tf_check.py
 
 This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the **TF transform** between two frames. It prints the focal lengths and principal point **once**, then reports the transform **every second** so you can confirm your extrinsics are being published correctly.
 
-#### What it does
+### What it does
 
 1. **Subscribes** to a `sensor_msgs/CameraInfo` topic (default **`/camera/cam2/color/image_raw/theora`** — you will almost certainly change this to your camera’s `.../camera_info` topic).
 2. **Parses intrinsics** from the `K` matrix:
@@ -100,7 +98,7 @@ This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the 
 
 > This node is read-only: it does not publish topics, only logs to the console.
 
-#### Parameters (ROS 2)
+### Parameters (ROS 2)
 
 | Name | Type | Default | Description |
 |---|---|---|---|
@@ -110,7 +108,7 @@ This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the 
 
 > **QoS**: The subscription is created with `QoSProfile(depth=10)`. If you see no CameraInfo arriving, switch to `QoSPresetProfiles.SENSOR_DATA` to match camera drivers (see “Improvements” below).
 
-#### Running
+### Running
 
 ```bash
 python3 cam_info_tf_check.py \
@@ -122,13 +120,13 @@ python3 cam_info_tf_check.py \
 
 ---
 
-### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> wrist_to_base.py
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> wrist_to_base.py
 
 This node detects **hands** with **MediaPipe**, samples **aligned depth** at the **wrist** pixel, **deprojects** to 3D using the color camera intrinsics, transforms the point to a chosen **base frame** via **TF2**, and publishes both left/right `PointStamped` and RViz `Marker`(s). It also publishes an annotated **debug image**.
 
 > Script: `wrist_to_base.py` (Python, ROS 2 rclpy).
 
-#### What it does
+### What it does
 
 1. **Subscribe** (SENSOR_DATA QoS):
    - Color image: `color_topic` (default `/camera/cam2/color/image_raw`)
@@ -146,7 +144,7 @@ This node detects **hands** with **MediaPipe**, samples **aligned depth** at the
 
 The node warns once if the depth’s `frame_id` differs from `source_frame` (likely **not aligned to color**) and if TF is missing.
 
-#### Parameters
+### Parameters
 
 | Name | Type | Default | Description |
 |---|---|---|---|
@@ -160,7 +158,7 @@ The node warns once if the depth’s `frame_id` differs from `source_frame` (lik
 
 **QoS:** Subscribers use `QoSPresetProfiles.SENSOR_DATA` (matches most camera drivers). Publishers use depth=10.
 
-#### Topics
+### Topics
 
 **Subscribed**  
 - `<color_topic>` — `sensor_msgs/Image` (BGR8)  
@@ -173,7 +171,7 @@ The node warns once if the depth’s `frame_id` differs from `source_frame` (lik
 - `/wrist_marker_array` — `visualization_msgs/MarkerArray`  
 - `/wrist/debug_image` — `sensor_msgs/Image` (BGR8) annotated
 
-#### Running
+### Running
 
 ```bash
 python3 wrist_to_base.py \
@@ -185,7 +183,7 @@ python3 wrist_to_base.py \
   -p target_frame:=platform_base
 ```
 
-#### How it works (key internals)
+### How it works (key internals)
 
 - **Depth robustness** — `robust_depth_at(u,v,depth,h,w)` tries windows **7, 11, 15**; takes the **median of non‑zero** pixels; returns `(z_meters, k_used)`; if none valid, returns `NaN`.  
 - **Deprojection** — Using `fx, fy, cx, cy` from `CameraInfo`:
@@ -198,7 +196,7 @@ python3 wrist_to_base.py \
 - **Left/Right mapping** — Uses MediaPipe `multi_handedness` to label hands “Left”/“Right” and publish to the corresponding topics.
 - **Debug overlay** — Draws skeleton, wrist pixel, and prints `label` and `z` (meters).
 
-#### Notes / Known quirks
+### Notes / Known quirks
 
 - The overlay message currently prints `"... z=...m )"` (an extra `)`); safe to ignore or fix in the source.  
 - The log suggests `align_depth.enable:=true`; the typical RealSense flag is `align_depth:=true`.  
@@ -207,13 +205,13 @@ python3 wrist_to_base.py \
 
 ---
 
-## <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/Universal_robots_logo.svg" alt="Universal Robots Icon" width="25"> UR3
+# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/Universal_robots_logo.svg" alt="Universal Robots Icon" width="25"> UR3
 
-### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_human_detect.py
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_human_detect.py
 
 This node fuses **MediaPipe Hands** (human wrists) and **YOLO** (UR3 joint detections) with **aligned depth** and **camera intrinsics** to compute 3D points in the **camera optical frame**, transforms them to a **base/world** frame via **TF2**, and publishes both **points** and **RViz markers**. It also publishes an **annotated debug image** for quick verification.
 
-#### Features
+### Features
 
 - **Human wrist tracking**: MediaPipe Hands (max 2), robust depth sampling, 3D point projected to base.
 - **UR3 joint detection**: YOLO model (configurable), best-per-class picking, 3D per-joint points and a **skeleton** line in base.
@@ -223,7 +221,7 @@ This node fuses **MediaPipe Hands** (human wrists) and **YOLO** (UR3 joint detec
 - **Debug overlay**: hand skeleton, wrist dots, UR3 bboxes, 2D skeleton, and depth text.
 - **QoS** tuned for sensors: subscribers use `SENSOR_DATA` profile.
 
-#### Parameters
+### Parameters
 
 | Name | Type | Default | Description |
 |---|---|---|---|
@@ -241,7 +239,7 @@ This node fuses **MediaPipe Hands** (human wrists) and **YOLO** (UR3 joint detec
 
 **QoS**: Subscriptions use `QoSPresetProfiles.SENSOR_DATA`. Publishers use a queue depth of 10.
 
-#### Topics
+### Topics
 
 **Subscribed**
 - `<color_topic>` — `sensor_msgs/Image` (BGR8)
@@ -254,7 +252,7 @@ This node fuses **MediaPipe Hands** (human wrists) and **YOLO** (UR3 joint detec
 - **Debug**: `/wrist/debug_image` (`sensor_msgs/Image`, annotated BGR8)
 - **(Optional)** per-joint `PointStamped`: `/ur3/{base,shoulder,elbow1,elbow2,elbow3,wrist}_point`
 
-#### How it works (pipeline)
+### How it works (pipeline)
 
 1. **Sync state**: wait until **CameraInfo** initializes a `PinholeCameraModel` and a **depth** frame is cached.
 2. **Human wrists (MediaPipe)**:
@@ -269,7 +267,7 @@ This node fuses **MediaPipe Hands** (human wrists) and **YOLO** (UR3 joint detec
    - Overlay 2D bboxes, confidences, and a 2D skeleton on the debug image.
 4. **Debug image** is published every frame even if depth/intrinsics are not yet ready (draws what’s available).
 
-#### Running
+### Running
 
 ```bash
 python3 D435f_UR_human_detect.py \
@@ -283,7 +281,7 @@ python3 D435f_UR_human_detect.py \
   -p ur3_class_names:="base,shoulder,elbow1,elbow2,elbow3,wrist"
 ```
 
-#### Camera & TF prerequisites
+### Camera & TF prerequisites
 
 - **Aligned depth** to color must be enabled (RealSense example):
   ```bash
@@ -300,7 +298,7 @@ python3 D435f_UR_human_detect.py \
 
 ---
 
-### <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_pose_ROSnode.py
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_UR_pose_ROSnode.py
 
 This ROS 2 node subscribes to a **color image** stream, runs an **Ultralytics YOLO (pose)** model to detect the **UR3 robot joints** in 2D, overlays a skeleton on the image, and publishes:
 - an **annotated image** you can view in RViz or `rqt_image_view`,
@@ -308,7 +306,7 @@ This ROS 2 node subscribes to a **color image** stream, runs an **Ultralytics YO
 
 > This script does **not** compute depth, 3D points, or TF. It is a light, real‑time **2D pose** publisher meant to feed downstream nodes or for visualization.
 
-#### What it does
+### What it does
 
 1. Subscribes to a color image (default **`/cam2/color/image_raw`**) with a camera‑friendly QoS (BEST_EFFORT, KEEP_LAST, depth=5).
 2. Loads an Ultralytics **YOLO pose** model (default path comes from `--model` or `UR_MODEL` env) and runs inference per frame.
@@ -318,7 +316,7 @@ This ROS 2 node subscribes to a **color image** stream, runs an **Ultralytics YO
    - **Keypoints** (`std_msgs/Float32MultiArray`) on `/ur3_pose/keypoints` with a layout describing a `(6,3)` array.
 5. Applies a simple **FPS throttle** (max ~30 FPS) so inference doesn’t backlog.
 
-#### Topics
+### Topics
 
 **Subscribed**
 - `Image` — **color** image (BGR8): default **`/cam2/color/image_raw`**
@@ -331,7 +329,7 @@ This ROS 2 node subscribes to a **color image** stream, runs an **Ultralytics YO
 - `JOINT_NAMES = [base, shoulder, elbow1, elbow2, elbow3, wrist]`
 - `SKELETON = [(0,1), (1,2), (2,3), (3,4), (4,5)]` (drawn only when both endpoint confidences > 0.5)
 
-#### Message format — keypoints
+### Message format — keypoints
 
 - Type: `std_msgs/Float32MultiArray`
 - Layout (`layout.dim`):
@@ -341,7 +339,7 @@ This ROS 2 node subscribes to a **color image** stream, runs an **Ultralytics YO
 
 If **no detection**, an empty array (`data=[]`) is published.
 
-#### Parameters / CLI / Environment
+### Parameters / CLI / Environment
 
 You can set options via **CLI args** (preferred) or **environment variables**. The parser tolerates extra `--ros-args` so you can launch it like any ROS node.
 
@@ -355,11 +353,11 @@ You can set options via **CLI args** (preferred) or **environment variables**. T
 
 > Device selection is automatic: **CUDA** if available, otherwise **CPU**.
 
-#### QoS
+### QoS
 
 The subscriber uses a camera‑friendly **BEST_EFFORT** / **KEEP_LAST** / **depth=5** profile to match most camera drivers and avoid reliability mismatches. The annotated image is published with the same QoS; the keypoints publisher uses a small queue (depth=10).
 
-#### Running
+### Running
 
 Direct (handy for VS Code)
 ```bash
@@ -372,7 +370,7 @@ python3 D435f_UR_pose_ROSnode.py \
 # Extra flags like --ros-args are tolerated (ignored by the parser)
 ```
 
-#### Performance tips
+### Performance tips
 
 - Use a smaller input image (camera resolution) or a lighter YOLO model to raise FPS.
 - Increase `--conf` to filter weak detections.
@@ -435,3 +433,6 @@ Launch the RViz2 and set up:
    - (optional) MarkerArray with topic `/wrist_marker_array`
    - (optional) Image with topic `/wrist/debug_image` to see the overlay
 
+---
+
+## 
