@@ -84,7 +84,7 @@ This ROS 2 node subscribes to a color stream, an **aligned depth-to-color** stre
 
 ---
 
-## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> cam_info_tf_check.py
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_cam_info_tf_check.py
 
 This tiny ROS 2 tool verifies **camera intrinsics** (from `CameraInfo`) and the **TF transform** between two frames. It prints the focal lengths and principal point **once**, then reports the transform **every second** so you can confirm your extrinsics are being published correctly.
 
@@ -120,7 +120,7 @@ python3 cam_info_tf_check.py \
 
 ---
 
-## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> wrist_to_base.py
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> D435f_wrist_to_base.py
 
 This node detects **hands** with **MediaPipe**, samples **aligned depth** at the **wrist** pixel, **deprojects** to 3D using the color camera intrinsics, transforms the point to a chosen **base frame** via **TF2**, and publishes both left/right `PointStamped` and RViz `Marker`(s). It also publishes an annotated **debug image**.
 
