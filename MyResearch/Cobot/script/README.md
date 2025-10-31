@@ -397,17 +397,6 @@ This command runs the ROS2 RealSense driver with the exact options we need for w
 
 ---
 
-## TFtree2 Environment Setup
-```
-ros2 run tf2_ros static_transform_publisher   0 0 1.25 3.14159265 -3.14159265 0  platform_base cam2_color_optical_frame
-```
-This command publishes a fixed TF transform from your table frame to the camera’s optical frame.
-- Translation `0 0 1.25`: `x y z`, the camera origin is 1.25 m above platform_base.
-- Rotation `π −π 0`: `roll pitch yaw`,  rotate 180° about X, then 180° about Y.
-  Net effect is equivalent to a 180° yaw: it flips both X and Y in the camera frame (turns it “upside-down” in-plane).
-
----
-
 ## Using RQT to See the Images
 ```
 ros2 run rqt_image_view rqt_image_view
@@ -435,4 +424,111 @@ Launch the RViz2 and set up:
 
 ---
 
-## 
+## <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python icon" width="20"> ROS_scene_builder.py
+
+A lightweight ROS 2 Python node that **publishes static TFs** and **draws simple RViz markers** for a lab “scene.”  
+It anchors a UR3 robot’s root frame under a platform, places a camera above the platform, and draws a platform slab, a cube, and camera axes.
+
+### What it does
+
+- Publishes static transforms on `/tf_static`:
+  - `world → platform_base` (identity)
+  - `platform_base → cam2_color_optical_frame`
+  - `platform_base → base_link` (UR3 root; change to `base` if your UR driver uses that)
+- Publishes a `visualization_msgs/MarkerArray` on `/visualization_marker_array` at 2 Hz:
+  - A gray platform slab with an outline
+  - A blue “cube” object
+  - RGB arrows that depict the camera axes, **computed in the platform frame** so they render without adding a separate TF in RViz
+
+> The math uses a roll‑pitch‑yaw → quaternion helper and a quaternion‑vector rotation routine to obtain the axis directions in platform coordinates.
+
+### Requirements
+
+- ROS 2 (tested with Humble/Foxy–Galactic should also work)
+- Python 3 with these ROS 2 packages available:
+  - `rclpy`
+  - `geometry_msgs`
+  - `visualization_msgs`
+  - `tf2_ros`
+
+> Make sure your environment is sourced:  
+> `source /opt/ros/<distro>/setup.bash`
+
+### Quick start
+
+1. Place `scene_builder.py` somewhere in your workspace (it can also run as a standalone script).
+2. Source your ROS 2 setup:  
+   ```bash
+   source /opt/ros/<distro>/setup.bash
+   ```
+3. Run the node:
+   ```bash
+   python3 scene_builder.py
+   ```
+4. Start RViz2:
+   ```bash
+   rviz2
+   ```
+   In RViz2:
+   - **Fixed Frame**: `world` (or `platform_base`, since world→platform is identity)
+   - **Add** → **TF** (optional, to see TF tree)
+   - **Add** → **MarkerArray**, set **Topic** to `/visualization_marker_array`
+
+You should see:
+- A 0.80 × 0.56 × 0.02 m platform at the origin (`platform_base`)
+- A blue cube centered at `(0.0, −0.35, 0.25)` with size `0.40 × 0.14 × 0.50 m`
+- Camera axes originating at `(0.0, 0.0, 1.25)` (in platform coordinates)
+
+### Integrating with `ur_robot_driver`
+
+Launch your driver **without RViz**:
+```bash
+ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur3 robot_ip:=<IP> launch_rviz:=false
+```
+Then run **this** node and your **own RViz2** as above.  
+This script sets a static transform `platform_base → base_link` so your UR3 TF tree hangs under the platform.
+
+> If your URDF uses `base` (not `base_link`) as the root, change `self.ur_root_frame` in the script accordingly.
+
+### Customization knobs (edit in the script)
+
+- **Camera pose wrt platform**
+  ```py
+  cam_xyz = (0.0, 0.0, 1.25)
+  cam_rpy = (math.pi, 0, 0.0)
+  ```
+- **UR3 root pose wrt platform**
+  ```py
+  ur_xyz = (-0.20, -0.35, 0.38)
+  ur_rpy = (math.pi/2, 0, -math.pi/2)  # if use_quaternion_for_base == False
+  ```
+  - To rotate the robot **about the Z‑axis by +90°** (yaw):  
+    `ur_rpy = (0, 0, math.pi/2)`
+  - To rotate **about Z by 180°**:  
+    `ur_rpy = (0, 0, math.pi)`
+  - To use a quaternion directly, set:
+    ```py
+    use_quaternion_for_base = True
+    ur_quat_cli = (qx, qy, qz, qw)
+    ```
+- **Geometry**
+  ```py
+  platform_size = (0.80, 0.56, 0.02)
+  cube_size     = (0.40, 0.14, 0.50)
+  cube_center   = (0.0, -0.35, 0.25)
+  ```
+
+### Why static timestamps are 0
+
+The node stamps TFs and markers with **time = 0** to avoid TF extrapolation issues if your clock is not running or when bags are used. RViz treats time 0 as “latest available.”
+
+### Topics and frames
+
+- Publishes:
+  - `/tf_static` (`tf2_msgs/TFMessage`, via `StaticTransformBroadcaster`)
+  - `/visualization_marker_array` (`visualization_msgs/MarkerArray`, 2 Hz)
+- Frames created/used:
+  - `world`, `platform_base`, `cam2_color_optical_frame`, and `base_link` (or `base`)
+
+
+
