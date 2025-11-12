@@ -29,7 +29,7 @@ The commands to launch devices and drivers, in order:
    ```
 3. Run the Python script to detect wrists by MediaPipe
    ```bash
-   python3 wrist_to_base.py \
+   python3 D435f_wrist_to_base.py \
     --ros-args \
     -p color_topic:=/camera/cam2/color/image_raw \
     -p depth_topic:=/camera/cam2/aligned_depth_to_color/image_raw \
@@ -43,7 +43,7 @@ The commands to launch devices and drivers, in order:
    ````
 5. Run the Python script to launch the scene builder
    ```bash
-   python Ros_scene_builder.py
+   python3 Ros_scene_builder.py
    ```
 6. Run the RViz
    ```bash
