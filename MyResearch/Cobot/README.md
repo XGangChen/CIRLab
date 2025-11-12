@@ -23,9 +23,9 @@ The commands to launch devices and drivers, in order:
    ```bash
    ros2 launch realsense2_camera rs_launch.py   camera_name:=cam2 enable_color:=true enable_depth:=true   align_depth.enable:=true initial_reset:=true
    ```
-2. Camera coordinate setup in TFtree
+2. Launch the UR3 driver to get the robot state
    ```bash
-   ros2 run tf2_ros static_transform_publisher   0 0 1.25 3.14159265 -3.14159265 0  platform_base cam2_color_optical_frame
+   ros2 launch ur_robot_driver ur_control.launch.py   ur_type:=ur3   robot_ip:=127.0.0.1   launch_rviz:=false
    ```
 3. Run the Python script to detect wrists by MediaPipe
    ```bash
@@ -41,15 +41,11 @@ The commands to launch devices and drivers, in order:
    ```bash
    ros2 run rqt_image_view rqt_image_view
    ````
-5. Launch the UR3 driver to get the robot state
+5. Run the Python script to launch the scene builder
    ```bash
-   ros2 launch ur_robot_driver ur_control.launch.py   ur_type:=ur3   robot_ip:=127.0.0.1   launch_rviz:=false
+   python Ros_scene_builder.py
    ```
-6. Publish a static transform from `platform_base` to `base_link`
-   ```bash
-   ros2 run tf2_ros static_transform_publisher 0 0 0 0 -0.70710678 0 0.70710678 platform_base base
-   ```
-7. Run the RViz
+6. Run the RViz
    ```bash
    rviz2
    ```
