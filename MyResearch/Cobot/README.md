@@ -29,13 +29,7 @@ The commands to launch devices and drivers, in order:
    ```
 3. Run the Python script to detect wrists by MediaPipe
    ```bash
-   python3 D435f_wrist_to_base.py \
-    --ros-args \
-    -p color_topic:=/camera/cam2/color/image_raw \
-    -p depth_topic:=/camera/cam2/aligned_depth_to_color/image_raw \
-    -p info_topic:=/camera/cam2/color/camera_info \
-    -p source_frame:=cam2_color_optical_frame \
-    -p target_frame:=platform_base
+   python3 D435f_wrist_to_base.py
    ```
 4. Using RQT to get images from the camera
    ```bash
