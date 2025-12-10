@@ -100,42 +100,46 @@ sudo nano /etc/security/limits.conf
 
   ---
   
-  * **Script Startup:**  
-    I followed the tutorial step-by-step, so I didn't use the `start_ursim.sh` script.  
-    There's another issue that the ROS2 command `ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=192.168.56.101` would result in an error about the IP address.  
-
-    (A) **The Three Network Layers You Have: Currently Wrong IP Setup**  
-      | Layer | What it is | Example IP range | Role |
-      |-------|------------|------------------|------|
-      | **Host (local machine)** | Ubuntu PC (where ROS 2 runs) | `192.168.1.x` (LAN) or `127.0.0.1` (loopback) | Runs ROS 2 |
-      | **Docker container network** | Internal Docker bridge (ursim container) | `172.17.0.0/16` (e.g., host: `172.17.0.1`, container: `172.17.0.2`) | Runs URSim |
-      | **VirtualBox Host-Only Adapter** | Host-only network for VMs | `192.168.56.0/24` | Not used by Docker; can conflict if reused |
-    
-      1. **Host to Docker container:**  
-        By default, Docker makes a bridge network:  
-        `Host (Ubuntu) -> docker0 interface: 172.17.0.1 -> container IP: 172.17.0.2`  
-        * The host can reach the container at `172.17.0.2`.
-        * The container can reach the host at `172.17.0.1`.
-        * To expose container ports to the outside, we use `-p HOST_PORT:CONTAINER_PORT`.  
-          `-p 30001:30001`: Any connection to `127.0.0.1:30001` on the host forwards to the container’s port `30001`.  
-      2. **VirtualBox Host-Only Adapter:**  
-        VirtualBox installs an interface like this: `vboxnet0 → 192.168.56.1 (host)`
-        This network is meant for VirtualBox VMs (not Docker).  
-        If you assign a Docker container IP inside `192.168.56.x`, your host will send packets to VirtualBox’s network instead — causing the “cannot connect to robot” error.
-      
-    (B) **The Correct IP Roles in Your Setup**  
-      | Component                  | What runs there           | Typical IP                                            | Explanation                                           |
-      |----------------------------|---------------------------|-------------------------------------------------------|-------------------------------------------------------|
-      | Host machine (Ubuntu)     | ROS 2, `ur_robot_driver`  | `127.0.0.1`, `172.17.0.1`, or LAN IP (e.g., `192.168.1.50`) | “localhost” means this machine itself |
-      | Docker container (URSim)  | Robot simulator           | `172.17.0.2` (inside `docker0` network)               | The virtual robot |
-      | VirtualBox                | (Not used for URSim)      | `192.168.56.x`                                        | Separate, unrelated network — should not be reused here |
-      
-    (C) **Connection Directions**  
-      | Direction                     | Who connects                           | Destination IP/port                                       | Explanation                                                         |
-      |-------------------------------|----------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------------|
-      | ROS 2 → URSim | ROS driver connects to URSim | `127.0.0.1:30001–30004` (if ports are mapped) | Set `robot_ip:=127.0.0.1` in the launch command |
-      | URSim → ROS 2 (reverse control) | External Control node connects back | Host IP visible to container (`172.17.0.1` or LAN IP) port `50002` | Configure this in the URSim GUI External Control node |
-
+  * **Network Configuration for URSim & ROS2 (Docker setup)**
+    This project uses a "Split-IP" configuration to handle communication between the ROS 2 driver (running natively on Ubuntu) and the URSim robot (running inside a Docker container).
+    - The Architecture
+      Because Docker isolates the robot's network, we use two different IP addresses for the two-way communication:
+      1. **Command Stream (ROS 2 → Robot):** Sent to `localhost` (mapped by Docker).
+      2. **Feedback Stream (Robot → ROS 2):** Sent to the **Host's Real LAN IP**, allowing the container to "break out" and talk to Ubuntu.
+    - Configuration Table
+      | Direction / Role | Setting Location | Value / Command | Explanation |
+      | :--- | :--- | :--- | :--- |
+      | **1. Host IP Discovery** | Ubuntu Terminal | `hostname -I` | Run this to find your computer's real LAN IP (e.g., `192.168.1.50`). |
+      | **2. Sending Commands**<br>(Forward Connection) | `ros2 launch` arg | `robot_ip:=127.0.0.1` | We target `localhost` because Docker forwards ports 30003/50002 from the container to the host. |
+      | **3. Receiving Feedback**<br>(Reverse Connection) | `ros2 launch` arg | `reverse_ip:=<YOUR_LAN_IP>` | Tells the ROS driver to listen on your actual Wi-Fi/Ethernet interface, not just localhost. |
+      | **4. Robot Configuration**<br>(Inside URSim) | **Installation** → **URCaps** → **External Control** | **Host IP:** `<YOUR_LAN_IP>`<br>**Custom Port:** `50002` | Tells the virtual robot to send data back to your Ubuntu machine's LAN IP. |
+  * Quick Start Commands
+    - Find your IP
+      ```bash
+      hostname -I
+      # Example output: 192.168.105.45
+      ```
+    - Launch ROS 2 Driver: Replace `192.168.105.45` with the IP found above.
+      ```bash
+      ros2 launch ur_robot_driver ur_control.launch.py \
+      ur_type:=ur3 \
+      robot_ip:=127.0.0.1 \
+      reverse_ip:=192.168.105.45 \
+      launch_rviz:=false
+      ```
+    - Configure URSim (GUI)
+      1. Open [URSim](http://localhost:6080/vnc.html?host=localhost&port=6080)
+      2. Set Host IP to `192.168.105.45`, port as default `50002`
+      3. Try the robot play bottom.
+         You should see the log in your driver terminal like bellow:
+         ```
+         [ur_ros2_control_node-1] [INFO] [1765353483.561948491] [UR_Client_Library:]: Robot requested program
+         [ur_ros2_control_node-1] [INFO] [1765353483.562008749] [UR_Client_Library:]: Sent program to robot
+         [ur_ros2_control_node-1] [INFO] [1765353501.582142255] [UR_Client_Library:]: Robot connected to reverse interface. Ready to receive control commands.
+         # After you press the stop bottom:
+         [ur_ros2_control_node-1] [INFO] [1765353504.821915320] [UR_Client_Library:]: Connection to reverse interface dropped.
+         ```
+  
   ---
   
   * **The Final Command I Use**  
@@ -170,8 +174,9 @@ sudo nano /etc/security/limits.conf
 
       # Run the ROS2 command to see the robot in RViz:
       ros2 launch ur_robot_driver ur_control.launch.py \
-        ur_type:=ur3 \
-        robot_ip:=127.0.0.1
+      ur_type:=ur3 \
+      robot_ip:=127.0.0.1 \
+      reverse_ip:=192.168.105.45
       ```
 
 # MoveIt  
