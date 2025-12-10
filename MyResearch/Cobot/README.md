@@ -27,19 +27,23 @@ The commands to launch devices and drivers, in order:
    ```bash
    ros2 launch ur_robot_driver ur_control.launch.py   ur_type:=ur3   robot_ip:=127.0.0.1   launch_rviz:=false
    ```
-3. Run the Python script to detect wrists by MediaPipe
+3. Launch the MoveIt 2
+   ```bash
+   ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur3 launch_rviz:=true
+   ```
+4. Run the Python script to detect wrists by MediaPipe
    ```bash
    python3 D435f_wrist_to_base.py
    ```
-4. Using RQT to get images from the camera
+5. Using RQT to get images from the camera
    ```bash
    ros2 run rqt_image_view rqt_image_view
    ````
-5. Run the Python script to launch the scene builder
+6. Run the Python script to launch the scene builder
    ```bash
    python3 Ros_scene_builder.py
    ```
-6. Run the RViz
+7. Run the RViz
    ```bash
    rviz2
    ```
