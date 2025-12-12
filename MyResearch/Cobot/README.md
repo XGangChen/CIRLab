@@ -25,7 +25,11 @@ The commands to launch devices and drivers, in order:
    ```
 2. Launch the UR3 driver to get the robot state
    ```bash
+   # To connect the URSim UR3
    ros2 launch ur_robot_driver ur_control.launch.py     ur_type:=ur3     robot_ip:=127.0.0.1     reverse_ip:=192.168.105.45     launch_rviz:=false
+
+   # To connect the real-world UR3
+   ros2 launch ur_robot_driver ur_control.launch.py     ur_type:=ur3     robot_ip:=192.168.77.101     launch_rviz:=false
    ```
 3. Launch the MoveIt 2
    ```bash
