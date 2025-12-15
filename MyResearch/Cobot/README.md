@@ -3,6 +3,8 @@
 > **Goal:** Design a safety algorithm for the Human-Robot workspace to avoid collisions. The experimental environment setup is using [UR3](https://www.universal-robots.com/download/manuals-cb-series/user/ur3/33/user-manual-ur3-cb-series-sw33-english-international/) as a collaborative robot, using Kinect V2 to detect human hand's 3D position, and using RealSense D435f to do human arm's pose estimation.
 
 ## 1) Experimental Environment
+The camera is installed at the top of my experimental platform and facing down, and it's a Human-Robot collaborative environment. The robot arm and human arms would be overlapping while the robot arm is moving from point A to B, and I want the MediaPipe to ignore the overlap. I defined the detected arms as the non-colliding obstacles, and using the relative coordinates we set so we can get the 3D coordinates of the obstacles. The robot I'm using is UR3, so I can get the robot state using its ROS2 driver in the virtual environment and show it in RViz2.
+
 ### Universal Robot UR3
 To set up the UR3 ROS2 Humble environment, follow this guide document [UR3](https://github.com/XGangChen/CIRLab/tree/main/MyResearch/UR3) in this repository. I tried to make it as clear as possible for all processes.
 
