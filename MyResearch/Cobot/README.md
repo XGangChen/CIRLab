@@ -33,23 +33,27 @@ The commands to launch devices and drivers, in order:
    # To connect the real-world UR3
    ros2 launch ur_robot_driver ur_control.launch.py     ur_type:=ur3     robot_ip:=192.168.77.101     launch_rviz:=false
    ```
-3. Launch the MoveIt 2
+3. Launch the ROBOTIQ Gripper
+   ```bash
+   ros2 launch robotiq_description robotiq_control.launch.py com_port:=/dev/ttyUSB0
+   ```
+4. Launch the MoveIt 2
    ```bash
    ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur3 launch_rviz:=true
    ```
-4. Run the Python script to detect wrists by MediaPipe
+5. Run the Python script to detect wrists by MediaPipe
    ```bash
    python3 D435f_wrist_to_base.py
    ```
-5. Using RQT to get images from the camera
+6. Using RQT to get images from the camera
    ```bash
    ros2 run rqt_image_view rqt_image_view
    ````
-6. Run the Python script to launch the scene builder
+7. Run the Python script to launch the scene builder
    ```bash
    python3 Ros_scene_builder.py
    ```
-7. Run the RViz
+8. Run the RViz
    ```bash
    rviz2
    ```
