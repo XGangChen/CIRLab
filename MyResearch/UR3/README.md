@@ -259,5 +259,5 @@ sudo nano /etc/security/limits.conf
     cat ~/.colcon/mixin/index.yaml
     ```
 
-# <img src="[https://assets.robotiq.com/website-assets/support_documents/document/User_Interface_PDF_20190724.pdf"](https://brandfetch.com/robotiq.com)" alt="ROBOTIQ Icon" width="30"> ROBOTIQ Gripper
+# <img src="https://brandfetch.com/robotiq.com" alt="ROBOTIQ Icon" width="30"> ROBOTIQ Gripper
    
