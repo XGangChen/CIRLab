@@ -180,7 +180,7 @@ sudo nano /etc/security/limits.conf
       ```
 
 
-# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/moveit_logo-white.svg" alt="ROBOTIQ Icon" width="120"> MoveIt  
+# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/moveit_logo-white.svg" alt="ROBOTIQ Icon" width="120"> Motion Planning
   I followed the tutorial document: [MoveIt](https://moveit.picknik.ai/main/index.html)  
   If there's any difference with my device, I will show and describe it below.  
   
@@ -260,5 +260,98 @@ sudo nano /etc/security/limits.conf
     cat ~/.colcon/mixin/index.yaml
     ```
 
-# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/ROBOTIQ_icon.svg" alt="ROBOTIQ Icon" width="120"> ROBOTIQ Gripper
+# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/ROBOTIQ_icon.svg" alt="ROBOTIQ Icon" width="120"> Gripper
 
+This section share the working configuration to control a Robotiq 2F-85 gripper connected via USB (`/dev/ttyUSB1`) while mounted on a UR3 robot arm.  
+It bypasses the problematic `robotiq_controllers` package and uses the standard `GripperActionController`.
+
+## Prerequisites & Dependencies
+
+  The standard `ros-humble-serial` package is missing from default repositories, so the serial library must be built from source.
+  ```bash
+  # 1. Install Serial Library (Switch to ROS 2 branch)
+  cd ~/ros_ws/src
+  git clone [https://github.com/tylerjw/serial.git](https://github.com/tylerjw/serial.git)
+  cd serial
+  git checkout ros2
+  
+  # 2. Clone Robotiq Package (Switch to Humble branch)
+  cd ~/ros_ws/src
+  git clone [https://github.com/PickNikRobotics/ros2_robotiq_gripper.git](https://github.com/PickNikRobotics/ros2_robotiq_gripper.git)
+  cd ros2_robotiq_gripper
+  git checkout -f humble
+  ```
+
+## Configuration Fixes
+  1. Fix Driver Linking Error
+     Edit `~/ros_ws/src/ros2_robotiq_gripper/robotiq_driver/CMakeLists.txt`:
+     - Find: `target_link_libraries(... serial::serial)`
+     - Replace with: `target_link_libraries(... serial)`
+  2. Clean Controller Configuration
+     Edit `~/ros_ws/src/ros2_robotiq_gripper/robotiq_description/config/robotiq_controllers.yaml`. Replace the entire file with this clean configuration (removing the broken activation controller):
+     ```YAML
+     controller_manager:
+        ros__parameters:
+          update_rate: 100  # Hz
+    
+        robotiq_gripper_controller:
+          type: position_controllers/GripperActionController
+    
+     robotiq_gripper_controller:
+        ros__parameters:
+          default: true
+          joint: rq_robotiq_85_left_knuckle_joint
+          use_effort_interface: false
+          use_speed_interface: false
+          action_monitor_rate: 20.0
+     ```
+  3. Set USB Port in URDF
+     Edit `~/ros_ws/src/ros2_robotiq_gripper/robotiq_description/urdf/ur3_robotiq_2f85.urdf.xacro`. Add the `com_port` argument to the gripper macro to match your hardware (`/dev/ttyUSB1`):
+     ```XML
+     <xacro:robotiq_gripper
+      parent="tool0"
+      prefix="rq_"
+      name="rq_2f85"
+      com_port="/dev/ttyUSB1">
+     ```
+## Building
+  Disable testing to avoid compilation errors in the test suites.
+  ```Bash
+  cd ~/ros_ws
+  # Optional: Clean old artifacts if switching versions
+  rm -rf build install log
+  
+  # Build specific packages
+  colcon build --packages-select serial robotiq_description robotiq_driver --cmake-args -DBUILD_TESTING=OFF
+  ```
+## Running the System
+  1. Terminal 1: Start Hardware Drivers
+      This launches the UR driver and the Robotiq Hardware Interface.
+      ```Bash
+      source ~/ros_ws/install/setup.bash
+      # Ensure permission for USB port
+      sudo chmod 666 /dev/ttyUSB1
+      
+      ros2 launch ur_robot_driver ur_control.launch.py \
+        ur_type:=ur3 \
+        robot_ip:=192.168.77.101 \
+        description_file:=/home/xgang/ros_ws/src/ros2_robotiq_gripper/robotiq_description/urdf/ur3_robotiq_2f85.urdf.xacro \
+        launch_rviz:=false
+      ```
+      > Wait for: `[RobotiqGripperHardwareInterface]: Robotiq Gripper successfully activated!`
+  2. Terminal 2: Load Gripper Controller
+      Because the standard launch file does not load the gripper controller automatically in this configuration, we spawn it manually.
+      ```Bash
+      source ~/ros_ws/install/setup.bash
+      
+      # 1. Manually set the controller type (workaround for parameter loading issue)
+      ros2 param set /controller_manager robotiq_gripper_controller.type position_controllers/GripperActionController
+      
+      # 2. Spawn the controller
+      ros2 run controller_manager spawner robotiq_gripper_controller \
+        -c /controller_manager \
+        --param-file /home/xgang/ros_ws/src/ros2_robotiq_gripper/robotiq_description/config/robotiq_controllers.yaml
+      ```
+      > Wait for: `Configured and activated robotiq_gripper_controller`
+  3. Terminal 3: Send Commands (Python Script)
+     The Python script I provide in the **Cobot** topic.
