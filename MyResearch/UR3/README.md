@@ -180,7 +180,7 @@ sudo nano /etc/security/limits.conf
       ```
 
 
-# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/moveit_logo-black.svg" alt="ROBOTIQ Icon" width="120"> MoveIt  
+# <img src="https://github.com/XGangChen/CIRLab/blob/main/MyResearch/UR3/icon/moveit_logo-white.svg" alt="ROBOTIQ Icon" width="120"> MoveIt  
   I followed the tutorial document: [MoveIt](https://moveit.picknik.ai/main/index.html)  
   If there's any difference with my device, I will show and describe it below.  
   
