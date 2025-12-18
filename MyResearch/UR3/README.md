@@ -258,4 +258,6 @@ sudo nano /etc/security/limits.conf
     ls -R ~/.colcon/mixin
     cat ~/.colcon/mixin/index.yaml
     ```
+
+# <img src="https://assets.robotiq.com/website-assets/support_documents/document/User_Interface_PDF_20190724.pdf" alt="ROBOTIQ Icon" width="30">ROBOTIQ Gripper
    
