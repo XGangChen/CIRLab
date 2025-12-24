@@ -33,8 +33,8 @@ The commands to launch devices and drivers, in order:
    # To connect the real-world UR3
    ros2 launch ur_robot_driver ur_control.launch.py     ur_type:=ur3     robot_ip:=192.168.77.101     launch_rviz:=false
 
-   # Launch the UR3 and Gripper together
-   ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur3 robot_ip:=192.168.77.101 description_file:=/home/xgang/ros_ws/src/ros2_robotiq_gripper/robotiq_description/urdf/ur3_robotiq_2f85.urdf.xacro  launch_rviz:=false
+   # Launch the UR3 and Gripper together 
+   ./path/to/start_robot.sh
    ```
 3. Launch the ROBOTIQ Gripper
    ```bash
@@ -42,7 +42,11 @@ The commands to launch devices and drivers, in order:
    ```
 4. Launch the MoveIt 2
    ```bash
+   # Launch the MoveIt directly.
    ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur3 launch_rviz:=true
+
+   # Get the UR3 and Gripper scenes in RViz
+   ros2 launch ur_moveit_config ur_moveit.launch.py   ur_type:=ur3   description_file:=/home/xgang/ws_robotiq/src/ros2_robotiq_gripper/robotiq_description/urdf/ur3_robotiq_2f85.urdf.xacro   launch_rviz:=true
    ```
 5. Run the Python script to detect wrists by MediaPipe
    ```bash
